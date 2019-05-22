@@ -1,0 +1,20 @@
+# Publish to PowerShell Gallery with this key
+environment:
+  NuGetApiKey:
+    secure: VMvVbhuMaUTbI8WgnJH/WF7UBGwj261AgERGm25s21zQErHoIdwacoF3yd6OjIWh
+
+image: Visual Studio 2017
+
+# specify the cloned folder in upper case so the PSGallery upload is in this format
+clone_folder: c:\projects\PSAccessTOken
+
+# Skip on updates to the readme.
+skip_commits:
+  files:
+  - README.md
+  - CHANGELOG.md
+
+build: false
+
+test_script:
+- ps: . .\build.ps1
