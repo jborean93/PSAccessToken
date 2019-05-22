@@ -84,7 +84,7 @@ Task Test -Depends Sanity  {
         $web_client = New-Object -TypeName System.Net.WebClient
         $web_client.UploadFIle(
             "https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)",
-            [Systen.IO.Path]::Combine($ProjectRoot, $TestFile)
+            [System.IO.Path]::Combine($ProjectRoot, $TestFile)
         )
     }
 

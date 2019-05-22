@@ -95,3 +95,4 @@ _Note: this requires PowerShellGet or WMF 5 to be installed_
 * Add NTAccount human names to cmdlets that return SIDs for a friendly output
 * Create a release once the majority of the above works
 * Change Installing example to download the combined module from PSGallery on the manual step instead of GitHub
+* Get tests working in Appveyor
