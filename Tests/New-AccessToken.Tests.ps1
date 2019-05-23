@@ -21,13 +21,13 @@ $none_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -A
 $system_sid = ConvertTo-SecurityIdentifier -InputObject 'S-1-5-18'
 $admin_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-32-544'
 
+# The tests require the SeCreateTokenPrivilege which we don't have. This function will get a token with this
+# privilege which we use to impersonate each test with.
+$elevated_token = Get-TokenWithPrivilege -Privileges 'SeCreateTokenPrivilege'
+
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
-
-        # The tests require the SeCreateTokenPrivilege which we don't have. This function will get a token with this
-        # privilege which we use to impersonate each test with.
-        $elevated_token = Get-TokenWithPrivilege -Privileges 'SeCreateTokenPrivilege'
 
         BeforeEach {
             $res = [PSAccessToken.NativeMethods]::ImpersonateLoggedOnUser(

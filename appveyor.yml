@@ -6,7 +6,7 @@ environment:
 image: Visual Studio 2017
 
 # specify the cloned folder in upper case so the PSGallery upload is in this format
-clone_folder: c:\projects\PSAccessTOken
+clone_folder: c:\projects\PSAccessToken
 
 # Skip on updates to the readme.
 skip_commits:
