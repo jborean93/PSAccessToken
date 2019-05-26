@@ -55,7 +55,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $entry_properties.Name[17] | Should -Be 'LogonServer'
             $entry_properties.TypeNameOfValue[17] | Should -Be 'System.String'
             $entry_properties.Name[18] | Should -Be 'DnsDomainName'
-            $entry_properties.TypeNameOfValue[18] | Should -Be 'System.String'
             $entry_properties.Name[19] | Should -Be 'Upn'
             $entry_properties.TypeNameOfValue[19] | Should -Be 'System.String'
 
