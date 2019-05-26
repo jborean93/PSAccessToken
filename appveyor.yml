@@ -43,9 +43,12 @@ install:
     }
 
     if ($changed) {
-        Write-Output -InputOBject "Rebooting node after applying UAC changed"
-        Restart-Computer -Force
+        Write-Output -InputObject "Rebooting node after applying UAC changed"
+        #Restart-Computer -Force
     }
+    $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+    $user.Value
+    $user.Translate([System.Security.Principal.NTAccount]).Value
 
 build: false
 
