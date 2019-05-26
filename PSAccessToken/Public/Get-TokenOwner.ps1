@@ -19,7 +19,7 @@ Function Get-TokenOwner {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The SecurityIdentifier of the owner of the access token.
+    The NTAccount of the owner of the access token.
 
     .EXAMPLE Gets the owner for the current process
     Get-TokenOwner
@@ -40,7 +40,7 @@ Function Get-TokenOwner {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.SecurityIdentifier])]
+    [OutputType([System.Security.Principal.NTAccount])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -62,6 +62,7 @@ Function Get-TokenOwner {
         $token_owner = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
             $TokenInfo, [Type][PSAccessToken.TOKEN_OWNER]
         )
-        New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_owner.Owner
+        $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_owner.Owner
+        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
     }
 }

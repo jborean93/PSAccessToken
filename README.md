@@ -13,16 +13,18 @@ Better docs are forthcoming, this is still a work in progress.
 Cmdlets included with this module are;
 
 * `Copy-AccessToken`: Makes a copy of an existing access token with the ability to change the impersonation level.
+* `Get-LogonsessionData`: Get the logon session data for the current process/thread or the token specified.
 * `Get-ProcessHandle`: Get a handle on the current process or an explicit process based on the PID.
 * `Get-ThreadHandle`: Get a handle on the current thread or an explicit thread based on the TID.
+* `Invoke-LogonUser`: Logs on an account through LSA and returns the access token and other logon info back.
 * `Invoke-WithImpersonation`: Invokes a scriptblock like [Invoke-Command](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/invoke-command?view=powershell-6) but under the security context of an access token.
 * `New-AccessToken`: Creates a new access token with any combination of user, groups, privileges, etc.
 * `New-RestrictedToken`: Creates a restricted copy of an existing access token, with various groups or privileges, removed or restricted.
 * `Open-ProcessToken`: Opens a process handle to get the access token inside.
 * `Open-ThreadToken`: Opens a thread handle to get the access token inside.
 
-There are also cmdlets to get and set individual token elements. These cmdlets
-are;
+There are also cmdlets to get and set individual accesstoken elements. These
+cmdlets are;
 
 * `Get-Token*`: Get information from an access token
 * `Set-Token*`: Set information on an access token, only certain classes can have information changed.
@@ -92,6 +94,5 @@ _Note: this requires PowerShellGet or WMF 5 to be installed_
 * Finish off the rest of the `Set-Token*` cmdlets
 * Add cmdlets to call `LogonUser` and generate an access token with S4U
 * Add cmdlet to call `CheckTokenMembership` to check if a SID is enabled on the specified access token
-* Add NTAccount human names to cmdlets that return SIDs for a friendly output
 * Create a release once the majority of the above works
 * Change Installing example to download the combined module from PSGallery on the manual step instead of GitHub

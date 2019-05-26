@@ -9,7 +9,8 @@ Function New-AccessToken {
     .DESCRIPTION
     Create a new access token using the NtCreateToken function. This function allows you to create an access token
     with any combination of groups, privileges, and other values that is desired. This is a very low level process and
-    requires a lot of input parameters to get a useful token.
+    requires a lot of input parameters to get a useful token. It is recommended to use the Invoke-LogonUser cmdlet
+    instead unless you need to manually craft the token.
 
     .PARAMETER User
     The user of the new token.
@@ -73,9 +74,9 @@ Function New-AccessToken {
     The integrity label for the token. This is automatically added as a group with the 'Integrity' and
     'IntegrityEnabled' attributes. The default is 'High'.
 
-    .PARAMETER AuthenticationId
-    Set the AuthenticationId of the token. This must be a valid AuthenticationId already created by Windows. Defaults
-    to the AuthenticationId of the current process token.
+    .PARAMETER LogonId
+    Set the LogonId of the token. This must be a valid LogonId already created by Windows. Defaults
+    to the LogonId of the current process token.
 
     .PARAMETER ExpirationTime
     Sets the expiration time of the token. This is not currently supported by Windows.
@@ -84,13 +85,12 @@ Function New-AccessToken {
     [PInvokeHelper.SafeNativeHandle] - A handle to the newly created token.
 
     .EXAMPLE Create an access token for the SYSTEM account
-    $auth_id = New-Object -TypeName PSAccessToken.LUID
-    $auth_id.LowPart = 999
+    $logon_id = [System.Security.Principal.SecurityIdentifier]'S-1-5-5-999-0'
 
     New-AccessToken -User 'SYSTEM' `
         -Groups 'Administrators' `
         -Privileges 'SeTcbPrivilege', 'SeRestorePrivilege', 'SeBackupPrivilege' `
-        -AuthenticationId $auth_id  # This isn't necessary but here for posterities sake
+        -LogonId $logon_id  # This isn't necessary but here for posterities sake
 
     .EXAMPLE Create a token with explicit owner and DACL
     New-AccessToken -User 'Guest' `
@@ -146,8 +146,8 @@ Function New-AccessToken {
         [System.String]
         $IntegrityLabel = 'High',
 
-        [PSAccessToken.LUID]
-        $AuthenticationId,
+        [System.Security.Principal.SecurityIdentifier]
+        $LogonId,
 
         [System.Int64]
         $ExpirationTime = 0
@@ -162,75 +162,11 @@ Function New-AccessToken {
     $variables = @{
         user = ConvertTo-SecurityIdentifier -InputObject $User
         expiration_time = $ExpirationTime
+        privileges = $Privileges
     }
 
-    # Parse the input groups, handle whether the group is a string, or has the optional Attributes added.
-    # The default attributes are for the group to be mandatory and enabled by default
-    $default_group_attributes = [PSAccessToken.TokenGroupAttributes]'Enabled, EnabledByDefault, Mandatory'
-    $variables.groups = @($Groups | ForEach-Object -Process {
-        $attributes = $default_group_attributes
-
-        if ($_ -is [System.Collections.IDictionary]) {
-            if (-not $_.ContainsKey('Sid')) {
-                throw "Groups entry does not contain key 'Sid'"
-            }
-            $sid = $_.Sid
-
-            if ($_.ContainsKey('Attributes')) {
-                $attributes = $_.Attributes
-            }
-        } else {
-            $sid = $_
-        }
-
-        @{
-            Sid = (ConvertTo-SecurityIdentifier -InputObject $sid)
-            Attributes = [PSAccessToken.TokenGroupAttributes]$attributes
-        }
-    })
-
-    # Common function to add groups to the existing group list
-    Function Add-SidToGroup {
-        Param (
-            [System.Security.Principal.SecurityIdentifier]$Sid,
-            [PSAccessToken.TokenGroupAttributes]$Attributes
-        )
-
-        $existing_group = $variables.groups | Where-Object { $_.Sid -eq $Sid }
-        if ($null -ne $existing_group) {
-            $existing_group.Attributes = $existing_group.Attributes -bor $Attributes
-        } else {
-            $variables.groups += @{
-                Sid = $Sid
-                Attributes = $Attributes
-            }
-        }
-    }
-
-    # Parse the input privileges, handle whether privileges is a string, or has the optional Attributes added.
-    # The default attributes are for the privilege to be enabled by default.
-    $default_token_attributes = [PSAccessToken.TokenPrivilegeAttributes]'Enabled, EnabledByDefault'
-    $variables.privileges = @($Privileges | ForEach-Object -Process {
-        $attributes = $default_token_attributes
-
-        if ($_ -is [System.Collections.IDictionary]) {
-            if (-not $_.ContainsKey('Name')) {
-                throw "Privileges entry does not contain key 'Name'"
-            }
-            $name = $_.Name
-
-            if ($_.ContainsKey('Attributes')) {
-                $attributes = $_.Attributes
-            }
-        } else {
-            $name = $_.ToString()
-        }
-
-        @{
-            Name = $name
-            Attributes = [PSAccessToken.TokenPrivilegeAttributes]$attributes
-        }
-    })
+    # Make sure we have a SID key for each group for easier comparison below.
+    $variables.groups = @($Groups | ConvertTo-SidAndAttributes -DefaultAttributes 'Enabled, EnabledByDefault, Mandatory')
 
     # Set the default of Owner to the User specified.
     if ($null -eq $Owner) {
@@ -246,8 +182,10 @@ Function New-AccessToken {
 
     # Add the Owner SID to the groups if the Owner is not the current user.
     if ($variables.owner -ne $variables.User -and $variables.owner -notin $variables.Groups) {
-        $owner_group_attributes = $default_group_attributes -bor [PSAccessToken.TokenGroupAttributes]::Owner
-        Add-SidToGroup -Sid $variables.owner -Attributes $owner_group_attributes
+        $variables.groups += @{
+            Sid = $variables.owner
+            Attributes = [PSAccessToken.TokenGroupAttributes]'Mandatory, Enabled, EnabledByDefault, Owner'
+        }
     }
 
     # Set the default of PrimaryGroup. Default to the None for local accounts, and Domain Users for domain accounts.
@@ -265,7 +203,10 @@ Function New-AccessToken {
     }
     $variables.primary_group = ConvertTo-SecurityIdentifier -InputObject $PrimaryGroup
     if ($variables.primary_group -notin $variables.groups.Sid) {
-        Add-SidToGroup -Sid $variables.primary_group -Attributes $default_group_attributes
+        $variables.groups += @{
+            Sid = $variables.primary_group
+            Attributes = [PSAccessToken.TokenGroupAttributes]'Mandatory, Enabled, EnabledByDefault'
+        }
     }
 
     # If DefaultDacl was not passed in, build our own to ensure the new process does not create unsecured objects.
@@ -320,41 +261,11 @@ Function New-AccessToken {
         Attributes = [PSAccessToken.TokenGroupAttributes]"Integrity, IntegrityEnabled"
     }
 
-    # Get the AuthenticationId for the current logon user.
-    if ($null -eq $AuthenticationId) {
-        $AuthenticationId = (Get-TokenStatistics).AuthenticationId
+    # Get the LogonId for the current logon user.
+    if ($null -eq $LogonId) {
+        $LogonId = (Get-TokenStatistics).AuthenticationId
     }
-    $variables.authentication_id = $AuthenticationId
-
-    # Calculate the size of the TOKEN_GROUPS structure
-    $tg_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-        [Type][PSAccessToken.TOKEN_GROUPS]
-    )
-    $sanda_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-            [Type][PSAccessToken.SID_AND_ATTRIBUTES]
-    )
-    # TOKEN_GROUPS already contains 1 SID_AND_ATTRIBUTES, remove from count.
-    $variables.token_groups_size = $tg_size + ($sanda_size * ($variables.groups.Length - 1))
-    $variables.token_groups_sid_offset = $variables.token_groups_size
-
-    foreach ($group in $variables.groups) {
-        $variables.token_groups_size += $group.Sid.BinaryLength
-    }
-
-    # Calculate the size of the TOKEN_PRIVILEGES structure
-    $tp_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-        [Type][PSAccessToken.TOKEN_PRIVILEGES]
-    )
-    $landa_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-        [Type][PSAccessToken.LUID_AND_ATTRIBUTES]
-    )
-    if ($variables.privileges.Length -eq 0) {
-        # If no privileges are being set on the token, we exclude the LUID_AND_ATTRIBUTES count.
-        $variables.token_privileges_size = $tp_size
-    } else {
-        # TOKEN_PRIVILEGES already contains 1 LUID_AND_ATTRIBUTES, remove from count.
-        $variables.token_privileges_size = $tp_size + ($landa_size * ($variables.privileges.Length - 1))
-    }
+    $variables.logon_id = Convert-SidToLogonId -InputObject $LogonId
 
     # TOKEN_SOURCE does not require it's own Ptr, just set first
     $token_source = New-Object -TypeName PSAccessToken.TOKEN_SOURCE
@@ -373,77 +284,15 @@ Function New-AccessToken {
         $token_user.User = $sid_and_attributes
         $Variables.token_user = $token_user
 
-        Use-SafePointer -Size $Variables.token_groups_size -Variables $Variables -Process {
+        $Variables.groups | Use-TokenGroupsPointer -Variables $Variables -Process {
             Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
 
-            # Because we are manually building the TOKEN_GROUPS struct, we use the Ptr as our input value
             $Variables.token_groups = $Ptr
 
-            # Track the location of the SIDs at the end of the TOKEN_GROUPS structure
-            $sid_ptr = [System.IntPtr]::Add($Ptr, $Variables.token_groups_sid_offset)
-
-            $token_groups = New-Object -TypeName PSAccessToken.TOKEN_GROUPS
-            $token_groups.GroupCount = $Variables.groups.Length
-            $token_groups.Groups = New-Object -TypeName PSAccessToken.SID_AND_ATTRIBUTES[] -ArgumentList 1
-
-            for ($i = 0; $i -lt $Variables.groups.Length; $i++) {
-                $group = $Variables.groups[$i]
-
-                $sanda = New-Object -TypeName PSAccessToken.SID_AND_ATTRIBUTES
-                $sanda.Attributes = $group.Attributes
-                $sanda.Sid = $sid_ptr
-
-                # Now copy the SID to the unmanaged memory section.
-                $sid_ptr = Copy-SidToPointer -Ptr $sid_ptr -Sid $group.Sid
-
-                if ($i -eq 0) {
-                    # The 1st SID_AND_ATTRIBUTES should be placed directly on the TOKEN_GROUPS struct, the structure
-                    # is copied after this loop.
-                    $token_groups.Groups[0] = $sanda
-                    $Ptr = [System.IntPtr]::Add($Ptr, [System.Runtime.InteropServices.Marshal]::SizeOf(
-                        [Type][PSAccessToken.TOKEN_GROUPS]
-                    ))
-                } else {
-                    # The remaining SID_AND_ATTRIBUTES are copied manually to the end of the TOKEN_GROUPS struct.
-                    $Ptr = Copy-StructureToPointer -Ptr $Ptr -Structure $sanda
-                }
-            }
-
-            # Now copy across the TOKEN_GROUPS structure
-            Copy-StructureToPointer -Ptr $Variables.token_groups -Structure $token_groups > $null
-
-            Use-SafePointer -Size $Variables.token_privileges_size -Variables $Variables -Process {
+            $Variables.privileges | Use-TokenPrivilegesPointer -Variables $Variables -Process {
                 Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
 
-                # Because we are manually building the TOKEN_PRIVILEGES struct, we use the Ptr as our input value
                 $Variables.token_privileges = $Ptr
-
-                $token_privileges = New-Object -TypeName PSAccessToken.TOKEN_PRIVILEGES
-                $token_privileges.PrivilegeCount = $Variables.privileges.Length
-                $token_privileges.Privileges = New-Object -TypeName PSAccessToken.LUID_AND_ATTRIBUTES[] -ArgumentList 1
-
-                for ($i = 0; $i -lt $Variables.privileges.Length; $i++) {
-                    $privilege = $Variables.privileges[$i]
-
-                    $landa = New-Object -TypeName PSAccessToken.LUID_AND_ATTRIBUTES
-                    $landa.Attributes = $privilege.Attributes
-                    $landa.Luid = Convert-PrivilegeToLuid -Name $privilege.Name
-
-                    if ($i -eq 0) {
-                        # The 1st LUID_AND_ATTRIBUTES should be placed directly on the TOKEN_PRIVILEGES struct, the
-                        # structure is copied after this looop.
-                        $token_privileges.Privileges[0] = $landa
-                        $Ptr = [System.IntPtr]::Add($Ptr, [System.Runtime.InteropServices.Marshal]::SizeOf(
-                            [Type][PSAccessToken.TOKEN_PRIVILEGES]
-                        ))
-                    } else {
-                        # The remaining LUID_AND_ATTRIBUTES are copied manually to the end of the TOKEN_PRIVILEGES struct.
-                        $Ptr = Copy-StructureToPointer -Ptr $Ptr -Structure $landa
-                    }
-                }
-
-                # Now copy across the TOKEN_PRIVILEGES structure
-                Copy-StructureToPointer -Ptr $Variables.token_privileges -Structure $token_privileges > $null
 
                 Use-SafePointer -Size $Variables.owner.BinaryLength -Variables $Variables -Process {
                     Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
@@ -503,7 +352,7 @@ Function New-AccessToken {
                                 $object_attributes.SecurityQualityOfService = $Ptr
 
                                 # We've built the input params, lets create the token.
-                                $old_state = Set-TokenPrivileges -Privileges @{ SeCreateTokenPrivilege = $true } -Strict
+                                $old_state = Set-TokenPrivileges -Name SeCreateTokenPrivilege -Strict
                                 try {
                                     # Don't actually create the token when in -WhatIf
                                     if (-not $PSCmdlet.ShouldProcess("Access Token", "Create")) {
@@ -516,7 +365,7 @@ Function New-AccessToken {
                                         [System.Security.Principal.TokenAccessLevels]::MaximumAllowed,
                                         [Ref]$object_attributes,
                                         $Variables.token_type,
-                                        [Ref]$Variables.authentication_id,
+                                        [Ref]$Variables.logon_id,
                                         [Ref]$Variables.expiration_time,
                                         [Ref]$Variables.token_user,
                                         $Variables.token_groups,
@@ -534,7 +383,7 @@ Function New-AccessToken {
 
                                     return $token
                                 } finally {
-                                    Set-TokenPrivileges -Privileges $old_state > $null
+                                    $old_state | Set-TokenPrivileges > $null
                                 }
                             }
                         }

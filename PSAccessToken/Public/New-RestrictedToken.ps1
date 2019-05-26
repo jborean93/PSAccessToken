@@ -98,9 +98,6 @@ Function New-RestrictedToken {
         $WriteRestricted
     )
 
-    $DisabledSids = ConvertTo-SecurityIdentifier -InputObject $DisabledSids
-    $RestrictedSids = ConvertTo-SecurityIdentifier -InputObject $RestrictedSids
-
     # Start with blank flags
     $flags = [PSAccessToken.RestrictedTokenFlags]0
     if ($DisableMaxPrivilege.IsPresent) {
@@ -122,53 +119,40 @@ Function New-RestrictedToken {
         $flags = $flags -bor [PSAccessToken.RestrictedTokenFlags]::WriteRestricted
     }
 
-    # Calculate the size of the Groups and Privileges structures
-    $sid_and_attributes_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-        [Type][PSAccessToken.SID_AND_ATTRIBUTES]
-    )
-    $luid_and_attributes_size = [System.Runtime.InteropServices.Marshal]::SizeOf(
-        [Type][PSAccessToken.LUID_AND_ATTRIBUTES]
-    )
-
-    $removed_privileges_size = $luid_and_attributes_size * $RemovedPrivileges.Length
-    $disabled_sids_size = $sid_and_attributes_size * $DisabledSids.Length
-    foreach ($group in $DisabledSids) {
-        $disabled_sids_size += $group.BinaryLength
+    $token_groups_params = @{
+        DefaultAttributes = 0
+        NullAsEmpty = $true
+        ForceDefaultAttributes = $true
+        OmitTokenGroups = $true
     }
-
-    $restricted_sids_size = $sid_and_attributes_size * $RestrictedSids.Length
-    foreach ($group in $RestrictedSids) {
-        $restricted_sids_size += $group.BinaryLength
+    $token_privileges_params = @{
+        DefaultAttributes = 0
+        NullAsEmpty = $true
+        ForceDefaultAttributes = $true
+        OmitTokenPrivileges = $true
     }
-
     $variables = @{
         flags = $flags
     }
+
     Use-ImplicitToken @PSBoundParameters -Variables $variables -Process {
         Param ([PInvokeHelper.SafeNativeHandle]$Token, [Hashtable]$Variables)
 
         # Create a pointer for the DisabledSids SID_AND_ATTRIBUTES[] array.
-        Use-SafePointer -Size $disabled_sids_size -Variables $Variables -Process {
+        $DisabledSids | Use-TokenGroupsPointer @token_groups_params -Variables $Variables -Process {
             Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
 
-            # Copy the DisabledSids SID_AND_ATTRIBUTES[] array to the pointer.
-            Copy-SidToSidAndAttributesPtr -Ptr $Ptr -Sids $DisabledSids
             $Variables.disabled_sids = $Ptr
 
             # Create a pointer for the RemovedPrivileges LUID_AND_ATTRIBUTES[] array.
-            Use-SafePointer -Size $removed_privileges_size -Variables $Variables -Process {
+            $RemovedPrivileges | Use-TokenPrivilegesPointer @token_privileges_params -Variables $Variables -Process {
                 Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
 
-                # Copy the RemovedPrivileges LUID_AND_ATTRIBUTES[] array to the pointer.
-                Copy-PrivilegeToLuidAndAttributesPtr -Ptr $Ptr -Privileges $RemovedPrivileges
                 $Variables.removed_privileges = $Ptr
 
                 # Create a pointer for the RestrictedSids SID_AND_ATTRIBUTES[] array.
-                Use-SafePointer -Size $restricted_sids_size -Variables $Variables -Process {
+                $RestrictedSids | Use-TokenGroupsPointer @token_groups_params -Variables $Variables -Process {
                     Param ([System.IntPtr]$Ptr, [Hashtable]$Variables)
-
-                    # Copy the RestrictedSids SID_AND_ATTRIBUTES[] array to the pointer.
-                    Copy-SidToSidAndAttributesPtr -Ptr $Ptr -Sids $RestrictedSids
 
                     # Return if in -WhatIf
                     if (-not $PSCmdlet.ShouldProcess("Restricted Access Token", "Create")) {

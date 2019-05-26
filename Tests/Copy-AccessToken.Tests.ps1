@@ -118,7 +118,9 @@ Describe "$cmdlet_name PS$ps_version tests" {
         }
 
         It 'Copied a token with explicit PID' {
-            $expected = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+            $expected = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Translate(
+                [System.Security.Principal.NTAccount]
+            )
 
             $h_token = Copy-AccessToken -ProcessId $PID
             try {

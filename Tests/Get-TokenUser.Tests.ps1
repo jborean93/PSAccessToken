@@ -10,6 +10,7 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
+. $PSScriptRoot\..\$module_name\Private\ConvertFrom-SecurityIdentifier.ps1
 . $PSScriptRoot\..\$module_name\Private\Use-SafePointer.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
@@ -17,23 +18,23 @@ Describe "$cmdlet_name PS$ps_version tests" {
         Set-StrictMode -Version latest
 
         It 'Gets the token user for current process' {
-            $expected = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+            $expected = ConvertFrom-SecurityIdentifier -Sid ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
             $actual = Get-TokenUser
 
-            $actual.GetType().FullName | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $actual.GetType().FullName | Should -Be 'System.Security.Principal.NTAccount'
             $actual.Value | Should -Be $expected.Value
         }
 
         It 'Gets the token user based on a PID' {
-            $expected = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+            $expected = ConvertFrom-SecurityIdentifier -Sid ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
             $actual = Get-TokenUser -ProcessId $PID
 
-            $actual.GetType().FullName | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $actual.GetType().FullName | Should -Be 'System.Security.Principal.NTAccount'
             $actual.Value | Should -Be $expected.Value
         }
 
         It 'Gets the token based on an explicit token' {
-            $expected = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+            $expected = ConvertFrom-SecurityIdentifier -Sid ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
 
             $h_token = Open-ProcessToken
             try {
@@ -42,7 +43,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $h_token.Dispose()
             }
 
-            $actual.GetType().FullName | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $actual.GetType().FullName | Should -Be 'System.Security.Principal.NTAccount'
             $actual.Value | Should -Be $expected.Value
         }
 

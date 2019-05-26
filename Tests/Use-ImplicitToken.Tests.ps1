@@ -97,7 +97,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
     }
 
     Context 'Open-ThreadToken failure' {
-        Mock Open-ThreadToken { throw "random failure" }
+        Mock -CommandName Open-ThreadToken -MockWith { throw "random failure" }
         It 'Fails to open thread token' {
             $expected = 'random failure'
             { Use-ImplicitToken -Process {} } | Should -Throw $expected

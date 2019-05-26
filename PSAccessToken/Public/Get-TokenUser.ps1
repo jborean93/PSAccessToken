@@ -63,6 +63,7 @@ Function Get-TokenUser {
             $TokenInfo,
             [Type][PSAccessToken.TOKEN_USER]
         )
-        New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_user.User.Sid
+        $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_user.User.Sid
+        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
     }
 }

@@ -21,7 +21,7 @@ Function Get-TokenStatistics {
     .OUTPUTS
     [PSAccessToken.TokenStatistics]
         TokenId - LUID the identifies the access token.
-        AuthenticationId - LUID assigned to the logon session of the token.
+        AuthenticationId - A SID that represents the LUID assigned to the logon session of the token.
         ExpirationTime - When the token expires (this is not currently supported by Windows)
         ImpersonationLevel - Whether the token is a primary or impersonation token, and the type of impersonation used.
         DynamicCharged - The number of bytes in memory for storing the default protection and primary group id.
@@ -88,10 +88,11 @@ Function Get-TokenStatistics {
             }
         }
 
+        $auth_id = "S-1-5-5-$($token_statistics.AuthenticationId.HighPart)-$($token_statistics.AuthenticationId.LowPart)"
         [PSCustomObject]@{
             PSTypeName = 'PSAccessToken.TokenStatistics'
             TokenId = $token_statistics.TokenId
-            AuthenticationId = $token_statistics.AuthenticationId
+            AuthenticationId = ConvertTo-SecurityIdentifier -InputObject $auth_id
             ExpirationTime = $token_statistics.ExpirationTime
             ImpersonationLevel = $imp_level
             DynamicCharged = $token_statistics.DynamicCharged

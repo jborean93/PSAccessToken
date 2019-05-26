@@ -22,11 +22,13 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual[0].GetType().FullName | Should -Be 'System.Management.Automation.PSCustomObject'
             $actual[0].PSObject.TypeNames[0] | Should -Be 'PSAccessToken.SidAndAttributes'
             $entry_properties = $actual[0].PSObject.Properties
-            $entry_properties.Value.Count | Should -Be 2
-            $entry_properties.Name[0] | Should -Be 'Sid'
-            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.SecurityIdentifier'
-            $entry_properties.Name[1] | Should -Be 'Attributes'
-            $entry_properties.TypeNameOfValue[1] | Should -Be 'PSAccessToken.TokenGroupAttributes'
+            $entry_properties.Value.Count | Should -Be 3
+            $entry_properties.Name[0] | Should -Be 'Account'
+            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.NTAccount'
+            $entry_properties.Name[1] | Should -Be 'Sid'
+            $entry_properties.TypeNameOfValue[1] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $entry_properties.Name[2] | Should -Be 'Attributes'
+            $entry_properties.TypeNameOfValue[2] | Should -Be 'PSAccessToken.TokenGroupAttributes'
 
             $expected_groups = [System.Security.Principal.WindowsIdentity]::GetCurrent().Groups
             foreach ($expected_group in $expected_groups) {
@@ -41,11 +43,13 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual[0].GetType().FullName | Should -Be 'System.Management.Automation.PSCustomObject'
             $actual[0].PSObject.TypeNames[0] | Should -Be 'PSAccessToken.SidAndAttributes'
             $entry_properties = $actual[0].PSObject.Properties
-            $entry_properties.Value.Count | Should -Be 2
-            $entry_properties.Name[0] | Should -Be 'Sid'
-            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.SecurityIdentifier'
-            $entry_properties.Name[1] | Should -Be 'Attributes'
-            $entry_properties.TypeNameOfValue[1] | Should -Be 'PSAccessToken.TokenGroupAttributes'
+            $entry_properties.Value.Count | Should -Be 3
+            $entry_properties.Name[0] | Should -Be 'Account'
+            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.NTAccount'
+            $entry_properties.Name[1] | Should -Be 'Sid'
+            $entry_properties.TypeNameOfValue[1] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $entry_properties.Name[2] | Should -Be 'Attributes'
+            $entry_properties.TypeNameOfValue[2] | Should -Be 'PSAccessToken.TokenGroupAttributes'
         }
 
         It 'Gets the token based on an explicit token' {
@@ -60,11 +64,13 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual[0].GetType().FullName | Should -Be 'System.Management.Automation.PSCustomObject'
             $actual[0].PSObject.TypeNames[0] | Should -Be 'PSAccessToken.SidAndAttributes'
             $entry_properties = $actual[0].PSObject.Properties
-            $entry_properties.Value.Count | Should -Be 2
-            $entry_properties.Name[0] | Should -Be 'Sid'
-            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.SecurityIdentifier'
-            $entry_properties.Name[1] | Should -Be 'Attributes'
-            $entry_properties.TypeNameOfValue[1] | Should -Be 'PSAccessToken.TokenGroupAttributes'
+            $entry_properties.Value.Count | Should -Be 3
+            $entry_properties.Name[0] | Should -Be 'Account'
+            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.NTAccount'
+            $entry_properties.Name[1] | Should -Be 'Sid'
+            $entry_properties.TypeNameOfValue[1] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $entry_properties.Name[2] | Should -Be 'Attributes'
+            $entry_properties.TypeNameOfValue[2] | Should -Be 'PSAccessToken.TokenGroupAttributes'
         }
     }
 }

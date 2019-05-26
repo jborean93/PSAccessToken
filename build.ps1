@@ -66,15 +66,16 @@ if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne "Trusted") {
     Write-Verbose -Message "Setting PSGallery as a trusted repository"
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
-
+#<#
 @(
     'Psake',
     'PSDeploy',
     'Pester',
     'BuildHelpers',
-    'PsScriptAnalyzer',
+    'PSScriptAnalyzer',
     'PInvokeHelper'
 ) | Resolve-Module
+#>
 
 Set-BuildEnvironment -ErrorAction SilentlyContinue
 

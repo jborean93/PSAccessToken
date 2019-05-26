@@ -10,33 +10,32 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
-. $PSScriptRoot\..\$module_name\Private\ConvertTo-SecurityIdentifier.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the token restricted sids for current process' {
-            $actual = Get-TokenRestrictedSids
-            $actual | Should -Be $null
+        It 'Gets the elevation type for current process' {
+            $actual = Get-TokenElevationType
+
+            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
         }
 
-        It 'Gets the token groups based on a PID' {
-            $actual = Get-TokenRestrictedSids -ProcessId $PID
-            $actual | Should -Be $null
+        It 'Gets the elevation type based on a PID' {
+            $actual = Get-TokenElevationType -ProcessId $PID
+
+            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
         }
 
-        It 'Gets the token based on an explicit token' {
-            $h_token = New-RestrictedToken -RestrictedSids 'Users'
+        It 'Gets the elevation based on an explicit token' {
+            $h_token = Open-ProcessToken
             try {
-                $actual = Get-TokenRestrictedSids -Token $h_token
+                $actual = Get-TokenElevationType -Token $h_token
             } finally {
                 $h_token.Dispose()
             }
 
-            $actual.GetType() | Should -Be ([System.Management.Automation.PSCustomObject])
-            $actual.Account | Should -Be 'BUILTIN\Users'
-            $actual.Sid | Should -Be (ConvertTo-SecurityIdentifier -InputObject 'Users')
+            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
         }
     }
 }

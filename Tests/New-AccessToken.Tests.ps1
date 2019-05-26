@@ -11,15 +11,22 @@ $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
 . $PSScriptRoot\..\$module_name\Private\ConvertTo-SecurityIdentifier.ps1
-.$PSScriptRoot\TestUtils.ps1
+. $PSScriptRoot\TestUtils.ps1
 
 $user_sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+$user_name = $user_sid.Translate([System.Security.Principal.NTAccount])
+
 $none_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList @(
     [System.Security.Principal.WellKnownSidType]::AccountDomainUsersSid,
     $user_sid.AccountDomainSid.Value
 )
+$none_name = $none_sid.Translate([System.Security.Principal.NTAccount])
+
 $system_sid = ConvertTo-SecurityIdentifier -InputObject 'S-1-5-18'
+$system_name = $system_sid.Translate([System.Security.Principal.NTAccount])
+
 $admin_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-32-544'
+$admin_name = $admin_sid.Translate([System.Security.Principal.NTAccount])
 
 # The tests require the SeCreateTokenPrivilege which we don't have. This function will get a token with this
 # privilege which we use to impersonate each test with.
@@ -71,7 +78,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_impersonation = Get-TokenImpersonationLevel -Token $h_token
                 $actual_statistics = Get-TokenStatistics -Token $h_token
 
-                $actual_user | Should -Be $system_sid
+                $actual_user | Should -Be $system_name
                 $actual_groups.Length | Should -Be 3
                 $actual_groups[0].Sid | Should -Be 'S-1-1-0'
                 $actual_groups[0].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
@@ -84,8 +91,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_privileges[0].Attributes | Should -Be 'EnabledByDefault, Enabled'
                 $actual_privileges[1].Name | Should -Be 'SeTcbPrivilege'
                 $actual_privileges[1].Attributes | Should -Be 'EnabledByDefault, Enabled'
-                $actual_owner | Should -Be $admin_sid
-                $actual_primary_group | Should -Be $system_sid
+                $actual_owner | Should -Be $admin_name
+                $actual_primary_group | Should -Be $system_name
                 $actual_default_dacl.Revision | Should -Be 2
                 $actual_default_dacl.Count | Should -Be 2
                 $actual_default_dacl.Item(0).AccessMask | Should -Be 0x10000000
@@ -100,8 +107,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_type | Should -be 'Primary'
                 $actual_impersonation | Should -Be 'None'
 
-                $actual_statistics.AuthenticationId.LowPart | Should -Be $token_stats.AuthenticationId.LowPart
-                $actual_statistics.AuthenticationId.HighPart | Should -Be $token_stats.AuthenticationId.HighPart
+                $actual_statistics.AuthenticationId | Should -Be $token_stats.AuthenticationId
                 $actual_statistics.ExpirationTime | Should -Be 0
             } finally {
                 $h_token.Dispose()
@@ -123,7 +129,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
 
-                $actual_user | Should -Be $user_sid
+                $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 3
                 $actual_groups[0].Sid | Should -Be 'S-1-16-12288'
                 $actual_groups[0].Attributes | Should -Be 'Integrity, IntegrityEnabled'
@@ -136,8 +142,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_privileges[0].Attributes | Should -Be 'EnabledByDefault, Enabled'
                 $actual_privileges[1].Name | Should -Be 'SeRestorePrivilege'
                 $actual_privileges[1].Attributes | Should -Be 'EnabledByDefault, Enabled'
-                $actual_owner | Should -Be $admin_sid
-                $actual_primary_group | Should -Be $none_sid
+                $actual_owner | Should -Be $admin_name
+                $actual_primary_group | Should -Be $none_name
                 $actual_default_dacl.Revision | Should -Be 2
                 $actual_default_dacl.Count | Should -Be 2
                 $actual_default_dacl.Item(0).AccessMask | Should -Be 0x10000000
@@ -167,7 +173,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
 
-                $actual_user | Should -Be $user_sid
+                $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 4
                 $actual_groups[0].Sid | Should -Be 'S-1-1-0'
                 $actual_groups[0].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
@@ -179,8 +185,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups[3].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
                 $actual_privileges.Name | Should -Be 'SeChangeNotifyPrivilege'
                 $actual_privileges.Attributes | Should -Be 'EnabledByDefault, Enabled'
-                $actual_owner | Should -Be $user_sid
-                $actual_primary_group | Should -Be $none_sid
+                $actual_owner | Should -Be $user_name
+                $actual_primary_group | Should -Be $none_name
                 $actual_default_dacl.Revision | Should -Be 2
                 $actual_default_dacl.Count | Should -Be 2
                 $actual_default_dacl.Item(0).AccessMask | Should -Be 0x10000000
@@ -210,7 +216,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
 
-                $actual_user | Should -Be $user_sid
+                $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 5
                 $actual_groups[0].Sid | Should -Be 'S-1-1-0'
                 $actual_groups[0].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
@@ -224,8 +230,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups[4].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
                 $actual_privileges.Name | Should -Be 'SeChangeNotifyPrivilege'
                 $actual_privileges.Attributes | Should -Be 'EnabledByDefault, Enabled'
-                $actual_owner | Should -Be $user_sid
-                $actual_primary_group | Should -Be $none_sid
+                $actual_owner | Should -Be $user_name
+                $actual_primary_group | Should -Be $none_name
                 $actual_default_dacl.Revision | Should -Be 2
                 $actual_default_dacl.Count | Should -Be 2
                 $actual_default_dacl.Item(0).AccessMask | Should -Be 0x10000000
@@ -253,7 +259,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                     $actual_groups = Get-TokenGroups | Sort-Object -Property Sid
                     $actual_privileges = Get-TokenPrivileges | Sort-Object -Property Name
 
-                    $actual_user | Should -Be $system_sid
+                    $actual_user | Should -Be $system_name
                     $actual_groups.Length | Should -Be 3
                     $actual_groups[0].Sid | Should -Be 'S-1-1-0'
                     $actual_groups[0].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
@@ -283,7 +289,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups = Get-TokenGroups -Token $h_token | Sort-Object -Property Sid
                 $actual_privileges = Get-TokenPrivileges -Token $h_token | Sort-Object -Property Name
 
-                $actual_user | Should -Be $system_sid
+                $actual_user | Should -Be $system_name
                 $actual_groups.Sid | Should -Be 'S-1-16-12288'
                 $actual_groups.Attributes | Should -Be 'Integrity, IntegrityEnabled'
                 $actual_privileges | Should -Be $null
@@ -312,7 +318,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_user = Get-TokenUser -Token $h_token
                 $actual_groups = Get-TokenGroups -Token $h_token | Sort-Object -Property Sid
 
-                $actual_user | Should -Be $user_sid
+                $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 3
                 $actual_groups[0].Sid | Should -Be 'S-1-16-12288'
                 $actual_groups[0].Attributes | Should -Be 'Integrity, IntegrityEnabled'
@@ -391,7 +397,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups[2].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
                 $actual_groups[3].Sid | Should -Be 'S-1-5-32-544'
                 $actual_groups[3].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
-                $actual_owner | Should -Be $user_sid
+                $actual_owner | Should -Be $user_name
             } finally {
                 $h_token.Dispose()
             }
@@ -417,7 +423,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups[2].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
                 $actual_groups[3].Sid | Should -Be 'S-1-5-32-544'
                 $actual_groups[3].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled, Owner'
-                $actual_primary_group | Should -Be $system_sid
+                $actual_primary_group | Should -Be $system_name
             } finally {
                 $h_token.Dispose()
             }
@@ -529,20 +535,18 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
         It 'Creates an access token with explicit authentication id' {
             # SYSTEM token always has a LUID of 0x3e7
-            $auth_id = New-Object -TypeName PSAccessToken.LUID
-            $auth_id.LowPart = 999
+            $logon_id = [System.Security.Principal.SecurityIdentifier]'S-1-5-5-0-999'
 
             $h_token = New-AccessToken `
                 -User $user_sid `
                 -Groups 'Administrators', 'Everyone' `
                 -Privileges 'SeChangeNotifyPrivilege', 'SeTimeZonePrivilege' `
-                -AuthenticationId $auth_id
+                -LogonId $logon_id
 
             try {
                 $actual_stats = Get-TokenStatistics -Token $h_token
 
-                $actual_stats.AuthenticationId.LowPart | Should -Be $auth_id.LowPart
-                $actual_stats.AuthenticationId.HighPart | Should -Be $auth_id.HighPart
+                $actual_stats.AuthenticationId | Should -Be $logon_id
             } finally {
                 $h_token.Dispose()
             }
@@ -551,14 +555,11 @@ Describe "$cmdlet_name PS$ps_version tests" {
         It 'Fails to run with custom authentication id' {
             $expected = 'NtCreateToken() failed: A specified logon session does not exist. It may already have been terminated (Win32 ErrorCode 1312 - 0x00000520)'
 
-            $auth_id = New-Object -TypeName PSAccessToken.LUID
-            $auth_id.LowPart = 1234
-
             { New-AccessToken `
                 -User $user_sid `
                 -Groups 'Administrators', 'Everyone' `
                 -Privileges 'SeChangeNotifyPrivilege', 'SeTimeZonePrivilege' `
-                -AuthenticationId $auth_id
+                -LogonId 'S-1-5-5-0-1234'
             } | Should -Throw $expected
         }
 

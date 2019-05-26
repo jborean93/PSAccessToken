@@ -8,6 +8,50 @@ $module_builder = New-DynamicModule -Name PSAccessToken
 # Import Enums
 @(
     @{
+        Name = 'PSAccessToken.LogonType'
+        Type = ([System.UInt32])
+        Values = @{
+            Interactive = 2
+            Network = 3
+            Batch = 4
+            Service = 5
+            Proxy = 6
+            Unlock = 7
+            NetworkCleartext = 8
+            NewCredentials = 9
+            RemoteInteractive = 10
+            CachedInteractive = 11
+            CachedRemoteInteractive = 12
+            CachedUnlock = 13
+        }
+    },
+    @{
+        Name = 'PSAccessToken.ProfileUserFlags'
+        Type = ([System.UInt32])
+        Flags = $true
+        Values = @{
+            Guest = 0x00000001
+            NoEncryption = 0x00000002
+            CachedAccount = 0x00000004
+            UsedLmPassword = 0x00000008
+            ExtraSids = 0x00000020
+            SubAuthSessionKey = 0x00000040
+            ServerTrustAccount = 0x00000080
+            Ntmlv2Enabled = 0x00000100
+            ResourceGroups = 0x00000200
+            ProfilePathReturned = 0x00000400
+            Ntv2 = 0x00000800
+            Lmv2 = 0x00001000
+            Ntlmv2 = 0x00002000
+            Optimized = 0x00004000
+            Winlogon = 0x00008000
+            Pkinit = 0x00010000
+            NotOptimized = 0x00020000
+            NoElevation = 0x00040000
+            ManagedServer = 0x00080000
+        }
+    },
+    @{
         Name = 'PSAccessToken.ObjectAttributesFlags'
         Type = ([System.UInt32])
         Flags = $true
@@ -47,6 +91,16 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             WriteDac = 0x00040000
             WriteOwner = 0x00080000
             Synchronize = 0x00100000
+        }
+    },
+    @{
+        Name = 'PSAccessToken.ProfileBufferType'
+        Type = ([System.UInt32])
+        Values = @{
+            Interactive = 2
+            Lm20 = 3
+            SmartCard = 4
+            KerbTicket = 5
         }
     },
     @{
@@ -215,6 +269,233 @@ $module_builder = New-DynamicModule -Name PSAccessToken
 # Import structs
 @(
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/lsalookup/ns-lsalookup-_lsa_string
+        Name = 'PSAccessToken.LSA_STRING'
+        Fields = @(
+            @{
+                Name = 'Length'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'MaximumLength'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'Buffer'
+                Type = ([System.String])
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::LPStr
+                }
+            }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/subauth/ns-subauth-_unicode_string
+        Name = 'PSAccessToken.LSA_UNICODE_STRING'
+        Fields = @(
+            @{
+                Name = 'Length'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'MaximumLength'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'Buffer'
+                # Keep as IntPtr because we sometimes deal with a SecureString and we don't want to expose that to the managed heap.
+                Type = ([System.IntPtr])
+            }
+        )
+    },
+    @{
+        # The same struct is used for both Kerberos and MSV1.0 so we just combine them.
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_kerb_interactive_logon
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_msv1_0_interactive_logon
+        Name = 'PSAccessToken.LSA_INTERACTIVE_LOGON'
+        Fields = @(
+            @{
+                Name = 'MessageType'
+                Type = ([System.UInt32])
+            },
+            @{
+                Name = 'LogonDomainName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'UserName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'Password'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            }
+        )
+    },
+    @{
+        # The same struct is used for both Kerberos and MSV1.0 so we just combine them.
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_msv1_0_interactive_profile
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-kerb_interactive_profile
+        Name = 'PSAccessToken.LSA_INTERACTIVE_PROFILE'
+        Fields = @(
+            @{
+                Name = 'MessageType'
+                Type = ([PSAccessToken.ProfileBufferType])
+            },
+            @{
+                Name = 'LogonCount'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'BadPasswordCount'
+                Type = ([System.UInt16])
+            },
+            @{
+                Name = 'LogonTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'LogoffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'KickOffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordLastSet'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordCanChange'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordMustChange'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'LogonScript'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'HomeDirectory'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'FullName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'ProfilePath'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'HomeDirectoryDrive'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'LogonServer'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'UserFlags'
+                Type = ([PSAccessToken.ProfileUserFlags])
+            }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_lsa_last_inter_logon_info
+        Name = 'PSAccessToken.LSA_LAST_INTER_LOGON_INFO'
+        Fields = @(
+            @{
+                Name = 'LastSuccessfulLogon'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'LastFailedLogon'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'FailedAttemptCountSinceLastSuccessfulLogon'
+                Type = ([System.UInt32])
+            }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-msv1_0_lm20_logon_profile
+        Name = 'PSAccessToken.LSA_LM20_LOGON_PROFILE'
+        Fields = @(
+            @{
+                Name = 'MessageType'
+                Type = ([PSAccessToken.ProfileBufferType])
+            },
+            @{
+                Name = 'KickOffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'LogoffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'UserFlags'
+                Type = ([PSAccessToken.ProfileUserFlags])
+            },
+            @{
+                Name = 'UserSessionKey'
+                Type = ([System.Byte[]])
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::ByValArray
+                    SizeConst = 16
+                }
+            },
+            @{
+                Name = 'LogonDomainName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'LanmanSessionKey'
+                Type = ([System.Byte[]])
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::ByValArray
+                    SizeConst = 8
+                }
+            },
+            @{
+                Name = 'LogonServer'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'UserParameters'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            }
+        )
+    },
+    @{
+        # The same struct is used for both Kerberos and MSV1.0 so we just combine them.
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_kerb_s4u_logon
+        Name = 'PSAccessToken.LSA_S4U_LOGON'
+        Fields = @(
+            @{
+                Name = 'MessageType'
+                Type = ([System.UInt32])
+            },
+            @{
+                Name = 'Flags'
+                Type = ([System.UInt32])
+            },
+            @{
+                Name = 'UserPrincipalName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'DomainName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            }
+        )
+    },
+    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_luid
         Name = 'PSAccessToken.LUID'
         Fields = @(
@@ -269,6 +550,134 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             @{
                 Name = 'SecurityQualityOfService'
                 Type = ([System.IntPtr])
+            }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_quota_limits
+        Name = 'PSAccessToken.QUOTA_LIMITS'
+        Fields = @(
+            @{
+                Name = 'PagedPoolLimit'
+                Type = ([System.UIntPtr])
+            },
+            @{
+                Name = 'NonPagedPoolLimit'
+                Type = ([System.UIntPtr])
+            },
+            @{
+                Name = 'MinimumWorkingSetSize'
+                Type = ([System.UIntPtr])
+            },
+            @{
+                Name = 'MaximumWorkingSetSize'
+                Type = ([System.UIntPtr])
+            },
+            @{
+                Name = 'PagefileLimit'
+                Type = ([System.UIntPtr])
+            },
+            @{
+                Name = 'TimeLimit'
+                Type = ([System.Int64])
+            }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/ns-ntsecapi-_security_logon_session_data
+        Name = 'PSAccessToken.SECURITY_LOGON_SESSION_DATA'
+        Fields = @(
+            @{
+                Name = 'Size'
+                Type = ([System.UInt32])
+            },
+            @{
+                Name = 'LogonId'
+                Type = 'PSAccessToken.LUID'
+            },
+            @{
+                Name = 'UserName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'LogonDomain'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'AuthenticationPackage'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'LogonType'
+                Type = ([PSAccessToken.LogonType])
+            },
+            @{
+                Name = 'Session'
+                Type = ([System.UInt32])
+            },
+            @{
+                Name = 'Sid'
+                Type = ([System.IntPtr])
+            },
+            @{
+                Name = 'LogonTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'LogonServer'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'DnsDomainName'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'Upn'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'UserFlags'
+                Type = ([PSAccessToken.ProfileUserFlags])
+            },
+            @{
+                Name = 'LastLogonInfo'
+                Type = 'PSAccessToken.LSA_LAST_INTER_LOGON_INFO'
+            },
+            @{
+                Name = 'LogonScript'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'ProfilePath'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'HomeDirectory'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'HomeDirectoryDrive'
+                Type = 'PSAccessToken.LSA_UNICODE_STRING'
+            },
+            @{
+                Name = 'LogoffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'KickOffTime'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordLastSet'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordCanChange'
+                Type = ([System.Int64])
+            },
+            @{
+                Name = 'PasswordMustChange'
+                Type = ([System.Int64])
             }
         )
     },
@@ -399,23 +808,6 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             @{
                 Name = 'TokenAppContainer'
                 Type = ([System.IntPtr])
-            }
-        )
-    },
-    @{
-        # https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_token_audit_policy
-        Name = 'PSAccessToken.TOKEN_AUDIT_POLICY'
-        Fields = @(
-            @{
-                Name = 'PerUserPolicy'
-                Type = ([System.Byte[]])
-                MarshalAs = @{
-                    Type = [System.Runtime.InteropServices.UnmanagedType]::ByValArray
-                    # ((POLICY_AUDIT_SUBCATEGORY_COUNT)>> 1)+ 1
-                    # ((58 >> 1) + 1)
-                    # 29 + 1
-                    SizeConst = 30
-                }
             }
         )
     },
@@ -696,6 +1088,97 @@ $type_builder = $module_builder.DefineType(
         SetLastError = $true
     },
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-auditenumeratecategories
+        DllName = 'Advapi32.dll'
+        Name = 'AuditEnumerateCategories'
+        ReturnType = @{
+            Type = [System.Boolean]
+            MarshalAs = @{
+                Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+            }
+        }
+        ParameterTypes = @(
+            @{ Ref = $true; Type = [System.IntPtr] },
+            @{ Ref = $true; Type = [System.UInt32] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-auditenumeratesubcategories
+        DllName = 'Advapi32.dll'
+        Name = 'AuditEnumerateSubCategories'
+        ReturnType = @{
+            Type = [System.Boolean]
+            MarshalAs = @{
+                Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+            }
+        }
+        ParameterTypes = @(
+            [System.Guid],
+            @{
+                Type = [System.Boolean]
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+                }
+            },
+            @{ Ref = $true; Type = [System.IntPtr] },
+            @{ Ref = $true; Type = [System.UInt32] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-auditfree
+        DllName = 'Advapi32.dll'
+        Name = 'AuditFree'
+        ReturnType = ([System.Void])
+        ParameterTypes = @(
+            [System.IntPtr]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-auditlookupcategorynamew
+        DllName = 'Advapi32.dll'
+        Name = 'AuditLookupCategoryNameW'
+        ReturnType = @{
+            Type = [System.Boolean]
+            MarshalAs = @{
+                Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+            }
+        }
+        ParameterTypes = @(
+            [System.Guid],
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-auditlookupsubcategorynamew
+        DllName = 'Advapi32.dll'
+        Name = 'AuditLookupSubCategoryNameW'
+        ReturnType = @{
+            Type = [System.Boolean]
+            MarshalAs = @{
+                Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+            }
+        }
+        ParameterTypes = @(
+            [System.Guid],
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/aa366535(v=vs.85)
+        DllName = 'Kernel32.dll'
+        Name = 'CopyMemory'
+        ReturnType = ([System.Void])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [System.IntPtr],
+            [System.UIntPtr]
+        )
+    },
+    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-createrestrictedtoken
         DllName = 'Advapi32.dll'
         Name = 'CreateRestrictedToken'
@@ -748,16 +1231,6 @@ $type_builder = $module_builder.DefineType(
         ReturnType = ([System.UInt32])
     },
     @{
-        # https://docs.microsoft.com/en-us/windows/desktop/api/processthreadsapi/nf-processthreadsapi-getprocessidofthread
-        DllName = 'Kernel32.dll'
-        Name = 'GetProcessIdOfThread'
-        ReturnType = ([System.UInt32])
-        ParameterTypes = @(
-            [System.IntPtr]
-        )
-        SetLastError = $true
-    },
-    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-gettokeninformation
         DllName = 'Advapi32.dll'
         Name = 'GetTokenInformation'
@@ -778,16 +1251,6 @@ $type_builder = $module_builder.DefineType(
         ReturnType = ([System.Boolean])
         ParameterTypes = @(
             [System.Runtime.InteropServices.SafeHandle]
-        )
-        SetLastError = $true
-    },
-    @{
-        # https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-localfree
-        DllName = 'Kernel32.dll'
-        Name = 'LocalFree'
-        ReturnType = ([System.IntPtr])
-        ParameterTypes = @(
-            [System.IntPtr]
         )
         SetLastError = $true
     },
@@ -832,6 +1295,97 @@ $type_builder = $module_builder.DefineType(
         )
         SetLastError = $true
         CharSet = [System.Runtime.InteropServices.CharSet]::Unicode
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaconnectuntrusted
+        DllName = 'Secur32.dll'
+        Name = 'LsaConnectUntrusted'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaderegisterlogonprocess
+        DllName = 'Secur32.dll'
+        Name = 'LsaDeregisterLogonProcess'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsafreereturnbuffer
+        DllName = 'Secur32.dll'
+        Name = 'LsaFreeReturnBuffer'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsagetlogonsessiondata
+        DllName = 'Secur32.dll'
+        Name = 'LsaGetLogonSessionData'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            @{ Ref = $true; Type = [PSAccessToken.LUID] },
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsalookupauthenticationpackage
+        DllName = 'Secur32.dll'
+        Name = 'LsaLookupAuthenticationPackage'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [PSAccessToken.LSA_STRING],
+            @{ Ref = $true; Type = [System.UInt32] }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsantstatustowinerror
+        DllName = 'Advapi32.dll'
+        Name = 'LsaNtStatusToWinError'
+        ReturnType = ([System.Int32])
+        ParameterTypes = @(
+            [System.UInt32]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsalogonuser
+        DllName = 'Secur32.dll'
+        Name = 'LsaLogonUser'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [PSAccessToken.LSA_STRING],
+            [PSAccessToken.LogonType],
+            [System.UInt32],
+            [System.IntPtr],
+            [System.UInt32],
+            [System.IntPtr],
+            [PSAccessToken.TOKEN_SOURCE],
+            @{ Ref = $true; Type = [System.IntPtr] },
+            @{ Ref = $true; Type = [System.UInt32] },
+            @{ Ref = $true; Type = [PSAccessToken.LUID] },
+            @{ Ref = $true; Type = [PInvokeHelper.SafeNativeHandle] },
+            @{ Ref = $true; Type = [PSAccessToken.QUOTA_LIMITS] },
+            @{ Ref = $true; Type = [System.UInt32] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaregisterlogonprocess
+        DllName = 'Secur32.dll'
+        Name = 'LsaRegisterLogonProcess'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [PSAccessToken.LSA_STRING],
+            @{ Ref = $true; Type = [System.IntPtr] },
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
     },
     @{
         # This is undocumented, used the below as a baseline
@@ -913,6 +1467,7 @@ $type_builder = $module_builder.DefineType(
         SetLastError = $true
     },
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/winternl/nf-winternl-rtlntstatustodoserror
         DllName = 'ntdll.dll'
         Name = 'RtlNtStatusToDosError'
         ReturnType = ([System.Int32])
@@ -950,5 +1505,37 @@ foreach ($import in @($public + $private)) {
 $public_functions = $public.Basename
 
 ### END TEMPLATED EXPORT FUNCTIONS ###
+
+# TypeData for the various PSCustomObjects created in this library
+@(
+    @{
+        TypeName = 'PSAccessToken.AuditCategory'
+        DefaultDisplayPropertySet = 'Name', 'Guid'
+    },
+    @{
+        TypeName = 'PSAccessToken.InteractiveProfile'
+        DefaultDisplayPropertySet = 'MessageType', 'UserFlags', 'LogonServer'
+    },
+    @{
+        TypeName = 'PSAccessToken.Lm20Profile'
+        DefaultDisplayPropertySet = 'MessageType', 'UserFlags', 'LogonServer'
+    },
+    @{
+        TypeName = 'PSAccessToken.LogonInfo'
+        DefaultDisplayPropertySet = 'Username', 'Domain', 'Token'
+    },
+    @{
+        TypeName = 'PSAccessToken.LogonSessionData'
+        DefaultDisplayPropertySet = 'UserName', 'DnsDomainName', 'LogonType', 'Session'
+    },
+    @{
+        TypeName = 'PSAccessToken.TokenAuditPolicy'
+        DefaultDisplayPropertySet = 'Policy', 'Success', 'Failure'
+    },
+    @{
+        TypeName = 'PSAccessToken.TokenStatistics'
+        DefaultDisplayPropertySet = 'TokenId', 'ImpersonationLevel', 'GroupCount', 'PrivilegeCount'
+    }
+) | ForEach-Object -Process { Update-TypeData -Force @_ }
 
 Export-ModuleMember -Function $public_functions

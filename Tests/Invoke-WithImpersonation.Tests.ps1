@@ -21,13 +21,16 @@ Describe "$cmdlet_name PS$ps_version tests" {
             try {
                 $actual = Invoke-WithImpersonation -Token $system_token -ScriptBlock {
                     [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+                    Get-TokenUser
                 }
             } finally {
                 $system_token.Dispose()
             }
 
-            $actual.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
-            $actual.Value | Should -Be 'S-1-5-18'
+            $actual[0].GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual[0].Value | Should -Be 'S-1-5-18'
+            $actual[1].GetType() | Should -Be ([System.Security.Principal.NTAccount])
+            $actual[1].Value | Should -Be 'NT AUTHORITY\SYSTEM'
         }
 
         It 'Should fail with invalid token' {
