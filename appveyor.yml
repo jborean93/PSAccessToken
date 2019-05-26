@@ -17,24 +17,34 @@ skip_commits:
 # We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
 install:
 - ps: |
+    $ErrorActionPreference = 'Stop'
     $reg_path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
     $reg_key = Get-Item -LiteralPath $reg_path
+    $changed = $false
 
     try {
         'FilterAdministratorToken', 'EnableLUA' | ForEach-Object -Process {
+            Write-Output -InputObject "Checking UAC registry property '$_'"
             $reg_value = $reg_key.GetValue($_, $null)
             if ($reg_value -ne 1) {
                 if ($null -ne $reg_value) {
+                    Write-Output -InputObject "UAC registry prop '$_' not equal to 1, deleting"
                     Remove-ItemProperty -LiteralPath $reg_path -Name $_
                 }
 
+                Write-Output -InputObject "Creating UAC registry prop '$_' with a DWord value of 1"
                 New-ItemProperty -LiteralPath $reg_path -Name $_ -Value 1 -PropertyType DWord > $null
+                $changed = $true
 
-                Restart-Computer -Force
             }
         }
     } finally {
         $reg_key.Dispose()
+    }
+
+    if ($changed) {
+        Write-Output -InputOBject "Rebooting node after applying UAC changed"
+        Restart-Computer -Force
     }
 
 build: false
