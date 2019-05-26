@@ -19,12 +19,14 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual = Get-TokenElevationType
 
             $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
+            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
         }
 
         It 'Gets the elevation type based on a PID' {
             $actual = Get-TokenElevationType -ProcessId $PID
 
             $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
+            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
         }
 
         It 'Gets the elevation based on an explicit token' {
@@ -36,6 +38,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             }
 
             $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
+            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
         }
     }
 }

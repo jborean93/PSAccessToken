@@ -95,7 +95,6 @@ _Note: this requires PowerShellGet or WMF 5 to be installed_
 * Generate docs based on cmdlet doc string
 * Finish off the rest of the `Get-Token*` cmdlets
 * Finish off the rest of the `Set-Token*` cmdlets
-* Add cmdlets to call `LogonUser` and generate an access token with S4U
 * Add cmdlet to call `CheckTokenMembership` to check if a SID is enabled on the specified access token
 * Create a release once the majority of the above works
 * Change Installing example to download the combined module from PSGallery on the manual step instead of GitHub

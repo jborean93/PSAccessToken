@@ -14,10 +14,41 @@ skip_commits:
   - README.md
   - CHANGELOG.md
 
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 # We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
 install:
 - ps: |
     $ErrorActionPreference = 'Stop'
+
+    Function Restart-AppVeyor {
+        $current_user_run = Get-Item -LiteralPath "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+        try {
+            $current_user_run.Property | Where-Object { $_.StartsWith("AppVeyor") } | ForEach-Object -Process {
+                $value = (Get-ItemProperty -LiteralPath $current_user_run.PSPath -Name $_).$_
+
+                $system_user_run = Get-Item -LiteralPath "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"
+                try {
+                    $system_run_value = $system_user_run.GetValue($_, $null)
+                    if ($null -ne $system_run_value) {
+                        Remove-ItemProperty -LiteralPath $system_user_run.PSPath -Name $_ -Force
+                    }
+                    New-ItemProperty -LiteralPath $system_user_run.PSPath -Name $_ -Value $value -PropertyType String > $null
+                } finally {
+                    $system_user_run.Dispose()
+                }
+
+                Remove-ItemProperty -LiteralPath $current_user_run.PSPath -Name $_ -Force
+            }
+        } finally {
+            $current_user_run.Dispose()
+        }
+
+        Restart-Computer -Force
+        Start-Sleep -Seconds 10
+    }
+
     $reg_path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
     $reg_key = Get-Item -LiteralPath $reg_path
     $changed = $false
@@ -44,11 +75,8 @@ install:
 
     if ($changed) {
         Write-Output -InputObject "Rebooting node after applying UAC changed"
-        #Restart-Computer -Force
+        Restart-AppVeyor
     }
-    $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
-    $user.Value
-    $user.Translate([System.Security.Principal.NTAccount]).Value
 
 build: false
 
