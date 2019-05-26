@@ -32,9 +32,15 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
         It 'Should raise exception and cleanly dispose token when failing to parse profile buffer' {
             $expected = 'custom exception'
-            $ss_pass = ConvertTo-SecureString -String 'password' -AsPlainText -Force
-            $account = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
-            { Invoke-LogonUser -Username $account -Password $ss_pass } | Should -Throw $expected
+
+            $system_token = Get-SystemToken
+            try {
+                Invoke-WithImpersonation -Token $system_token -ScriptBlock {
+                    { Invoke-LogonUser -Username 'SYSTEM' -Password $null } | Should -Throw $expected
+                }
+            } finally {
+                $system_token.Dispose()
+            }
         }
     }
 

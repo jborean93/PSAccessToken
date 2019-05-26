@@ -14,6 +14,29 @@ skip_commits:
   - README.md
   - CHANGELOG.md
 
+# We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
+install:
+- ps: |
+    $reg_path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+    $reg_key = Get-Item -LiteralPath $reg_path
+
+    try {
+        'FilterAdministratorToken', 'EnableLUA' | ForEach-Object -Process {
+            $reg_value = $reg_key.GetValue($_, $null)
+            if ($reg_value -ne 1) {
+                if ($null -ne $reg_value) {
+                    Remove-ItemProperty -LiteralPath $reg_path -Name $_
+                }
+
+                New-ItemProperty -LiteralPath $reg_path -Name $_ -Value 1 -PropertyType DWord > $null
+
+                Restart-Computer -Force
+            }
+        }
+    } finally {
+        $reg_key.Dispose()
+    }
+
 build: false
 
 test_script:

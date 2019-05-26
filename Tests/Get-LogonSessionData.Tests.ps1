@@ -54,11 +54,10 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $entry_properties.TypeNameOfValue[16] | Should -Be 'System.String'
             $entry_properties.Name[17] | Should -Be 'LogonServer'
             $entry_properties.TypeNameOfValue[17] | Should -Be 'System.String'
-            $entry_properties.Name[18] | Should -Be 'DnsDomainName'
-            $entry_properties.Name[19] | Should -Be 'Upn'
-            $entry_properties.TypeNameOfValue[19] | Should -Be 'System.String'
 
             # Cannot rely on these being set, just check the propert name
+            $entry_properties.Name[18] | Should -Be 'DnsDomainName'
+            $entry_properties.Name[19] | Should -Be 'Upn'
             $entry_properties.Name[20] | Should -Be 'LogonScript'
             $entry_properties.Name[21] | Should -Be 'ProfilePath'
             $entry_properties.Name[22] | Should -Be 'HomeDirectory'

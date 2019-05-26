@@ -84,6 +84,9 @@ changes. To test out your changes locally you can just run `.\build.ps1` in
 PowerShell. This script will ensure all dependencies are installed before
 running the test suite.
 
+The tests are expected to be run as an Administrative account that has UAC
+enabled and applied to the current user.
+
 _Note: this requires PowerShellGet or WMF 5 to be installed_
 
 
