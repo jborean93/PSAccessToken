@@ -15,7 +15,15 @@ Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the token Bno Isolation for current process' {
+        
+        $it_params = @{}
+        $os_version = [Version](Get-Item -LiteralPath "$env:SystemRoot\System32\kernel32.dll").VersionInfo.ProductVersion
+        if ($os_version -lt [Version]"10.0.16299") {
+            # TokenBnoIsolation was added in Windows 10 1709 (Build 16299)
+            $it_params.Skip = $true
+        }
+
+        It 'Gets the token Bno Isolation for current process' @it_params {
             $actual = Get-TokenBnoIsolation
 
             $actual.GetType() | Should -Be ([System.Management.Automation.PSCustomObject])
@@ -24,7 +32,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual.Prefix | Should -Be $null
         }
 
-        It 'Gets the token Bno Isolation based on a PID' {
+        It 'Gets the token Bno Isolation based on a PID' @it_params {
             $actual = Get-TokenBnoIsolation -ProcessId $PID
 
             $actual.GetType() | Should -Be ([System.Management.Automation.PSCustomObject])
@@ -33,7 +41,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual.Prefix | Should -Be $null
         }
 
-        It 'Gets the token Bno Isolation on an explicit token' {
+        It 'Gets the token Bno Isolation on an explicit token' @it_params {
             $h_token = Open-ProcessToken
             try {
                 $actual = Get-TokenBnoIsolation -Token $h_token
