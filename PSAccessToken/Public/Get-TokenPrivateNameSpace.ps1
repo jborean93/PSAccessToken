@@ -1,13 +1,14 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenHasRestrictions {
+Function Get-TokenPrivateNameSpace {
     <#
     .SYNOPSIS
-    Check if the access token has restrictions applied.
+    Check if the access token has a filtered token available.
 
     .DESCRIPTION
-    Check if the access token has restrictions applied.
+    Check if the access token has a filtered token available. This restricted token can be retrieved with the
+    Get-TokenLinkedToken cmdlet.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -19,15 +20,15 @@ Function Get-TokenHasRestrictions {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    [System.Boolean] Whether there is a restrictions applied to the token.
+    [System.Boolean] Whether there is a restricted token available or not.
 
-    .EXAMPLE Check if token is restricted for the current process
+    .EXAMPLE Gets the restriction token availability for the current process
     Get-TokenHasRestrictions
 
-    .EXAMPLE Check if token is restricted for the process with the id 1234
+    .EXAMPLE Gets the restriction token availability for the process with the id 1234
     Get-TokenHasRestrictions -ProcessId 1234
 
-    .EXAMPLE Check if token is restricted for an existing token handle
+    .EXAMPLE Gets the restriction token availability for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
@@ -60,7 +61,7 @@ Function Get-TokenHasRestrictions {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::HasRestrictions) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrivateNameSpace) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
         $hash_rest_bytes = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength

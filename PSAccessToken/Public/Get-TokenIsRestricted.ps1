@@ -1,13 +1,14 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenHasRestrictions {
+Function Get-TokenIsRestricted {
     <#
     .SYNOPSIS
-    Check if the access token has restrictions applied.
+    Check if the token is a restricted token.
 
     .DESCRIPTION
-    Check if the access token has restrictions applied.
+    Check if a token is restricted. A restricted token has been created by CreateRestrictedToken with restricted
+    Sids or Privileges.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -19,20 +20,20 @@ Function Get-TokenHasRestrictions {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    [System.Boolean] Whether there is a restrictions applied to the token.
+    [System.Boolean] Whether the token is restricted or not.
 
-    .EXAMPLE Check if token is restricted for the current process
-    Get-TokenHasRestrictions
+    .EXAMPLE Checks if the token is restricted for the current process
+    Get-TokenIsRestricted
 
-    .EXAMPLE Check if token is restricted for the process with the id 1234
-    Get-TokenHasRestrictions -ProcessId 1234
+    .EXAMPLE Checks if the token is restricted for the process with the id 1234
+    Get-TokenIsRestricted -ProcessId 1234
 
-    .EXAMPLE Check if token is restricted for an existing token handle
+    .EXAMPLE Checks if the token is restricted for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenHasRestrictions -Token $h_token
+            Get-TokenIsRestricted -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -42,10 +43,6 @@ Function Get-TokenHasRestrictions {
     #>
     [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        "PSUseSingularNouns", "",
-        Justification="The actual object is called TOKEN_RESTRICTIONS"
-    )]
     Param (
         [Parameter(ParameterSetName="Token")]
         [System.Runtime.InteropServices.SafeHandle]
@@ -60,13 +57,13 @@ Function Get-TokenHasRestrictions {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::HasRestrictions) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::IsRestricted) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $hash_rest_bytes = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength
+        $is_restricted = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength
         [System.Runtime.InteropServices.Marshal]::Copy(
-            $TokenInfo, $hash_rest_bytes, 0, $hash_rest_bytes.Length
+            $TokenInfo, $is_restricted, 0, $is_restricted.Length
         )
-        return [System.BitConverter]::ToBoolean($hash_rest_bytes, 0)
+        return [System.BitConverter]::ToBoolean($is_restricted, 0)
     }
 }

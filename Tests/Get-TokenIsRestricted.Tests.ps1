@@ -16,22 +16,22 @@ Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the has restrictions for current process' {
-            $actual = Get-TokenHasRestrictions
+        It 'Gets the is restricted for current process' {
+            $actual = Get-TokenIsRestricted
 
             $actual | Should -Be $false
         }
 
-        It 'Gets the has restrictions based on a PID' {
-            $actual = Get-TokenHasRestrictions -ProcessId $PID
+        It 'Gets the is restricted enabled based on a PID' {
+            $actual = Get-TokenIsRestricted -ProcessId $PID
 
             $actual | Should -Be $false
         }
 
-        It 'Gets the has restrictions based on an explicit token' {
+        It 'Gets the is restricted enabled based on an explicit token' {
             $h_token = Open-ProcessToken
             try {
-                $actual = Get-TokenHasRestrictions -Token $h_token
+                $actual = Get-TokenIsRestricted -Token $h_token
             } finally {
                 $h_token.Dispose()
             }
@@ -39,26 +39,14 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual | Should -Be $false
         }
 
-        It 'Gets the has restrictions status for a default token' {
-            $system_token = Get-SystemToken
+        It 'Get IsRestricted with a restricted token' {
+            $restricted_token = New-RestrictedToken -RestrictedSids 'Administrator'
             try {
-                Invoke-WithImpersonation -Token $system_token -ScriptBlock {
-                    $actual = Get-TokenHasRestrictions
-                    $actual | Should -Be $true
-                }
-            } finally {
-                $system_token.Dispose()
-            }
-        }
-
-        It 'Gets the has restrictions status for a limited token' {
-            $linked_token = Get-TokenLinkedToken
-            try {
-                $actual = Get-TokenHasRestrictions -Token $linked_token
+                $actual = Get-TokenIsRestricted -Token $restricted_token
 
                 $actual | Should -Be $true
             } finally {
-                $linked_token.Dispose()
+                $restricted_token.Dispose()
             }
         }
     }

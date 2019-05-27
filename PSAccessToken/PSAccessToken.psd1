@@ -21,6 +21,7 @@
         'Get-TokenAppContainerNumber',
         'Get-TokenAppContainerSid',
         'Get-TokenAuditPolicy',
+        'Get-TokenBnoIsolation',
         'Get-TokenCapabilities',
         'Get-TokenDefaultDacl',
         'Get-TokenElevation',
@@ -31,13 +32,16 @@
         'Get-TokenImpersonationLevel',
         'Get-TokenIntegrityLevel',
         'Get-TokenIsAppContainer',
+        'Get-TokenIsRestricted',
         'Get-TokenLinkedToken',
         'Get-TokenLogonSid',
         'Get-TokenMandatoryPolicy',
         'Get-TokenOrigin',
         'Get-TokenOwner',
         'Get-TokenPrimaryGroup',
+        'Get-TokenPrivateNameSpace',
         'Get-TokenPrivileges',
+        'Get-TokenProcessTrustLevel',
         'Get-TokenRestrictedSids',
         'Get-TokenSandboxInert',
         'Get-TokenSessionId',
@@ -55,7 +59,8 @@
         'New-RestrictedToken',
         'Open-ProcessToken',
         'Open-ThreadToken',
-        'Set-TokenPrivileges'
+        'Set-TokenPrivileges',
+        'Test-TokenMembership'
     )
     PrivateData = @{
         PSData = @{

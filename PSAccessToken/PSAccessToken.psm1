@@ -8,6 +8,15 @@ $module_builder = New-DynamicModule -Name PSAccessToken
 # Import Enums
 @(
     @{
+        Name = 'PSAccessToken.CtmfInclude'
+        Type = ([System.UInt32])
+        Flags = $true
+        Values = @{
+            AppContainer = 0x00000001
+            Lpac = 0x00000002
+        }
+    },
+    @{
         Name = 'PSAccessToken.LogonType'
         Type = ([System.UInt32])
         Values = @{
@@ -216,6 +225,7 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             Capabilities = 30
             AppContainerSid = 31
             AppContainerNumber = 32
+            # TODO: Get
             UserClaimAttributes = 33
             DeviceClaimAttributes = 34
             RestrictedUserClaimAttributes = 35
@@ -223,11 +233,13 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             DeviceGroups = 37
             RestrictedDeviceGroups = 38
             SecurityAttributes = 39
+            # TODO: End Get
             IsRestricted = 40
             ProcessTrustLevel = 41
             PrivateNameSpace = 42
-            SingletonAttributes = 43
+            SingletonAttributes = 43  # No docs, 16 bytes long
             BnoIsolation = 44
+            # Too new, will need to look into futher down the line.
             ChildProcessFlags = 45
             IsLessPrivilegedAppContainer = 46
             IsSandboxed = 47
@@ -825,6 +837,9 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             @{
                 Name = 'IsolationEnabled'
                 Type = ([System.Boolean])
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+                }
             }
         )
     },
@@ -987,6 +1002,15 @@ $module_builder = New-DynamicModule -Name PSAccessToken
                     Type = [System.Runtime.InteropServices.UnmanagedType]::ByValArray
                     SizeConst = 1
                 }
+            }
+        )
+    },
+    @{
+        Name = 'PSAccessToken.TOKEN_PROCESS_TRUST_LEVEL'
+        Fields = @(
+            @{
+                Name = 'Sid'
+                Type = ([System.IntPtr])
             }
         )
     },
@@ -1165,6 +1189,31 @@ $type_builder = $module_builder.DefineType(
         ParameterTypes = @(
             [System.Guid],
             @{ Ref = $true; Type = [System.IntPtr] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembership
+        DllName = 'Advapi32.dll'
+        Name = 'CheckTokenMembership'
+        ReturnType = ([System.Boolean])
+        ParameterTypes = @(
+            [PInvokeHelper.SafeNativeHandle],
+            [System.IntPtr],
+            @{ Ref = $true; Type = [System.Boolean] }
+        )
+        SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembershipex
+        DllName = 'Kernel32.dll'
+        Name = 'CheckTokenMembershipEx'
+        ReturnType = ([System.Boolean])
+        ParameterTypes = @(
+            [PInvokeHelper.SafeNativeHandle],
+            [System.IntPtr],
+            [PSAccessToken.CtmfInclude],
+            @{ Ref = $true; Type = [System.Boolean] }
         )
         SetLastError = $true
     },

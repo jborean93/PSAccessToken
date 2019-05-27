@@ -1,13 +1,13 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenHasRestrictions {
+Function Get-TokenProcessTrustLevel {
     <#
     .SYNOPSIS
-    Check if the access token has restrictions applied.
+    Get the SID of the token's trust level.
 
     .DESCRIPTION
-    Check if the access token has restrictions applied.
+    Get the SID that represents the trust level of the access token. If no trust level is set then this returns null.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -19,20 +19,20 @@ Function Get-TokenHasRestrictions {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    [System.Boolean] Whether there is a restrictions applied to the token.
+    [System.Security.Principal.SecurityIdentifier] The token's trust level SID.
 
-    .EXAMPLE Check if token is restricted for the current process
-    Get-TokenHasRestrictions
+    .EXAMPLE Gets the token trust level for the current process
+    Get-TokenProcessTrustLevel
 
-    .EXAMPLE Check if token is restricted for the process with the id 1234
-    Get-TokenHasRestrictions -ProcessId 1234
+    .EXAMPLE Gets the token trust level for the process with the id 1234
+    Get-TokenProcessTrustLevel -ProcessId 1234
 
-    .EXAMPLE Check if token is restricted for an existing token handle
+    .EXAMPLE Gets the token trust level SID for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenHasRestrictions -Token $h_token
+            Get-TokenProcessTrustLevel -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -40,12 +40,8 @@ Function Get-TokenHasRestrictions {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Boolean])]
+    [OutputType([System.Security.Principal.SecurityIdentifier])]
     [CmdletBinding(DefaultParameterSetName="Token")]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        "PSUseSingularNouns", "",
-        Justification="The actual object is called TOKEN_RESTRICTIONS"
-    )]
     Param (
         [Parameter(ParameterSetName="Token")]
         [System.Runtime.InteropServices.SafeHandle]
@@ -60,13 +56,12 @@ Function Get-TokenHasRestrictions {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::HasRestrictions) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::ProcessTrustLevel) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $hash_rest_bytes = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength
-        [System.Runtime.InteropServices.Marshal]::Copy(
-            $TokenInfo, $hash_rest_bytes, 0, $hash_rest_bytes.Length
+        $trust_level = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
+            $TokenInfo, [Type][PSAccessToken.TOKEN_PROCESS_TRUST_LEVEL]
         )
-        return [System.BitConverter]::ToBoolean($hash_rest_bytes, 0)
+        ConvertTo-SecurityIdentifier -InputObject $trust_level.Sid
     }
 }
