@@ -1,14 +1,13 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenCapabilities {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Get the capabilities associated with the token.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Get the capabilities associated with the token.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,20 +19,23 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [PSAccessToken.SidAndAttributes]
+        Account - The NTAccount representation of the Sid.
+        Sid - The security identifier of the capability.
+        Attributes - Attributes of the capability referenced by the Sid.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the capabilities for the current process
+    Get-TokenCapabilities
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the capabilities for the process with the id 1234
+    Get-TokenCapabilities -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the capabilities for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenCapabilities -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -41,8 +43,12 @@ Function Get-TokenPrimaryGroup {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType('PSAccessToken.SidAndAttributes')]
     [CmdletBinding(DefaultParameterSetName="Token")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        "PSUseSingularNouns", "",
+        Justification="The actual TokenInfoClass is called TokenCapabilities"
+    )]
     Param (
         [Parameter(ParameterSetName="Token")]
         [System.Runtime.InteropServices.SafeHandle]
@@ -57,13 +63,9 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::Capabilities) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
-        )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        Convert-PointerToTokenGroups -Ptr $TokenInfo
     }
 }

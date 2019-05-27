@@ -1,14 +1,13 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenLogonSid {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Get the Logon SID of the access token.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Gets the Logon SID of the access token that is used to uniquely identify the logon session on the current host.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,28 +19,34 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [PSAccessToken.TokenLogonSid]
+        Account - The human name of the Sid.
+        Sid - The SecurityIdentifier of the logon SID level.
+        Attributes - Further attributes of the logon SID group.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the logon SID for the current process
+    Get-TokenLogonSid
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the logon SID for the process with the id 1234
+    Get-TokenLogonSid -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the logon SID for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenLogonSid -Token $h_token
         } finally {
             $h_token.Dispose()
         }
     } finally {
         $h_process.Dispose()
     }
+
+    .NOTES
+    This is not the same as the Logon ID (or Authentication ID) that is LSA logon session identifier.
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType('PSAccessToken.TokenLogonSid')]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -57,13 +62,15 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::LogonSid) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
-        )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        $token_groups = Convert-PointerToTokenGroups -Ptr $TokenInfo
+        [PSCustomObject]@{
+            PSTypeName = 'PSAccessToken.TokenLogonSid'
+            Account = $token_groups.Account
+            Sid = $token_groups.Sid
+            Attributes = $token_groups.Attributes
+        }
     }
 }

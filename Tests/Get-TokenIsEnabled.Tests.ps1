@@ -10,21 +10,33 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
-. $PSScriptRoot\..\$module_name\Private\$cmdlet_name.ps1
+. $PSScriptRoot\TestUtils.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Should fail with invalid SID form <InputObject>' -TestCases @(
-            @{ InputObject = 'S-1-1-0' },
-            @{ InputObject = 'S-1-5-5-0' },
-            @{ InputObject = 'S-1-5-5-1-2-3' }
-        ) {
-            Param ($InputObject)
+        It 'Gets the is appcontainer for current process' {
+            $actual = Get-TokenIsAppContainer
 
-            $expected = "The input SID '$InputObject' does not match the pattern 'S-1-5-5-{High}-{Low}', not a valid LogonID."
-            { Convert-SidToLogonId -InputObject $InputObject } | Should -Throw $expected
+            $actual | Should -Be $false
+        }
+
+        It 'Gets the is appcontainer enabled based on a PID' {
+            $actual = Get-TokenIsAppContainer -ProcessId $PID
+
+            $actual | Should -Be $false
+        }
+
+        It 'Gets the is appcontainer enabled based on an explicit token' {
+            $h_token = Open-ProcessToken
+            try {
+                $actual = Get-TokenIsAppContainer -Token $h_token
+            } finally {
+                $h_token.Dispose()
+            }
+
+            $actual | Should -Be $false
         }
     }
 }

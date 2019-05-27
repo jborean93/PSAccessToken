@@ -1,14 +1,15 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenVirtualizationEnabled {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Check if UAC virtualization is enabled for the token.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Check if UAC virtualization is enabled for the token. Virtualization is a feature of UAC that allows per-machine
+    file and registry operations to target virtual, per-user file and registry locations than the actual per-machine
+    locations.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,20 +21,20 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [System.Boolean] Whether virtualization is enabled for the token.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the virtualization enabled status for the current process
+    Get-TokenVirtualizationAllowed
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the virtualization enabled status for the process with the id 1234
+    Get-TokenVirtualizationAllowed -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the virtualization enabled status for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenVirtualizationAllowed -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -41,7 +42,7 @@ Function Get-TokenPrimaryGroup {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -57,13 +58,13 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::VirtualizationEnabled) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
+        $enabled_bytes = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength
+        [System.Runtime.InteropServices.Marshal]::Copy(
+            $TokenInfo, $enabled_bytes, 0, $enabled_bytes.Length
         )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        return [System.BitConverter]::ToBoolean($enabled_bytes, 0)
     }
 }

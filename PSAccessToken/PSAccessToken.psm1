@@ -241,7 +241,7 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             Off = 0
             NoWriteUp = 1
             NewProcessMin = 2
-            ValidMask =3
+            ValidMask = 3
         }
     },
     @{
@@ -794,11 +794,12 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             @{
                 Name = 'TrustLevelSid'
                 Type = ([System.IntPtr])
-            },
-            @{
-                Name = 'SecurityAttributes'
-                Type = ([System.IntPtr])
             }
+            # Reserved and not available prior to Windows 10.
+            #@{
+            #    Name = 'SecurityAttributes'
+            #    Type = ([System.IntPtr])
+            #}
         )
     },
     @{

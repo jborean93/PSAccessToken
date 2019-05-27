@@ -62,7 +62,7 @@ Function Get-TokenOwner {
         $token_owner = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
             $TokenInfo, [Type][PSAccessToken.TOKEN_OWNER]
         )
-        $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_owner.Owner
+        $sid = ConvertTo-SecurityIdentifier -InputObject $token_owner.Owner
         ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
     }
 }

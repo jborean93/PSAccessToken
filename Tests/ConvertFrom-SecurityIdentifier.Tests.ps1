@@ -84,7 +84,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             Param ($Sid, $Expected)
 
             $input_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $Sid
-            $expected = New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList 'NT AUTHORITY', "Logon Session ID $Expected"
+            $expected = New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList 'NT AUTHORITY', "LogonSessionId_$Expected"
             $actual = ConvertFrom-SecurityIdentifier -Sid $input_sid
 
             $actual | Should -Be $expected

@@ -20,7 +20,7 @@ Function Get-TokenOrigin {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The SecurityIdentifier of the originating logon ID.
+    [PSAccessToken.LUID] The LUID of the originating LSA Logon Session.
 
     .EXAMPLE Gets the origin for the current process
     Get-TokenOrigin
@@ -41,7 +41,7 @@ Function Get-TokenOrigin {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.SecurityIdentifier])]
+    [OutputType([PSAccessToken.LUID])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -63,7 +63,6 @@ Function Get-TokenOrigin {
         $token_origin = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
             $TokenInfo, [Type][PSAccessToken.TOKEN_ORIGIN]
         )
-        $origin_id_sid = "S-1-5-5-$($token_origin.OriginatingLogonSession.HighPart)-$($token_origin.OriginatingLogonSession.LowPart)"
-        New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $origin_id_sid
+        return $token_origin.OriginatingLogonSession
     }
 }

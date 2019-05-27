@@ -77,6 +77,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_type = Get-TokenType -Token $h_token
                 $actual_impersonation = Get-TokenImpersonationLevel -Token $h_token
                 $actual_statistics = Get-TokenStatistics -Token $h_token
+                $actual_elevation_type = Get-TokenElevationType -Token $h_token
+                $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $system_name
                 $actual_groups.Length | Should -Be 3
@@ -109,6 +111,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
                 $actual_statistics.AuthenticationId | Should -Be $token_stats.AuthenticationId
                 $actual_statistics.ExpirationTime | Should -Be 0
+                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
+                $actual_elevation | Should -Be $true
             } finally {
                 $h_token.Dispose()
             }
@@ -128,6 +132,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_owner = Get-TokenOwner -Token $h_token
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
+                $actual_elevation_type = Get-TokenElevationType -Token $h_token
+                $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 3
@@ -154,6 +160,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_default_dacl.Item(1).AceFlags | Should -Be 'None'
                 $actual_default_dacl.Item(1).AceType | Should -Be 'AccessAllowed'
                 $actual_default_dacl.Item(1).SecurityIdentifier | Should -Be $system_sid
+                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
+                $actual_elevation | Should -Be $true
             } finally {
                 $h_token.Dispose()
             }
@@ -172,6 +180,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_owner = Get-TokenOwner -Token $h_token
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
+                $actual_elevation_type = Get-TokenElevationType -Token $h_token
+                $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 4
@@ -197,6 +207,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_default_dacl.Item(1).AceFlags | Should -Be 'None'
                 $actual_default_dacl.Item(1).AceType | Should -Be 'AccessAllowed'
                 $actual_default_dacl.Item(1).SecurityIdentifier | Should -Be $system_sid
+                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
+                $actual_elevation | Should -Be $false
             } finally {
                 $h_token.Dispose()
             }
@@ -215,6 +227,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_owner = Get-TokenOwner -Token $h_token
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
+                $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $user_name
                 $actual_groups.Length | Should -Be 5
@@ -242,6 +255,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_default_dacl.Item(1).AceFlags | Should -Be 'None'
                 $actual_default_dacl.Item(1).AceType | Should -Be 'AccessAllowed'
                 $actual_default_dacl.Item(1).SecurityIdentifier | Should -Be $system_sid
+                $actual_elevation | Should -Be $false
             } finally {
                 $h_token.Dispose()
             }
@@ -505,6 +519,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
             try {
                 $actual_groups = Get-TokenGroups -Token $h_token | Sort-Object -Property Sid
+                $actual_level = Get-TokenIntegrityLevel -Token $h_token
 
                 $actual_groups.Length | Should -Be 4
                 $actual_groups[0].Sid | Should -Be 'S-1-1-0'
@@ -515,6 +530,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_groups[2].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled'
                 $actual_groups[3].Sid | Should -Be 'S-1-5-32-544'
                 $actual_groups[3].Attributes | Should -Be 'Mandatory, EnabledByDefault, Enabled, Owner'
+                $actual_level.Sid | Should -Be $Expected
             } finally {
                 $h_token.Dispose()
             }
@@ -535,7 +551,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
         It 'Creates an access token with explicit authentication id' {
             # SYSTEM token always has a LUID of 0x3e7
-            $logon_id = [System.Security.Principal.SecurityIdentifier]'S-1-5-5-0-999'
+            $logon_id = New-Object -TypeName PSAccessToken.LUID
+            $logon_id.LowPart = 999
 
             $h_token = New-AccessToken `
                 -User $user_sid `
@@ -559,7 +576,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 -User $user_sid `
                 -Groups 'Administrators', 'Everyone' `
                 -Privileges 'SeChangeNotifyPrivilege', 'SeTimeZonePrivilege' `
-                -LogonId 'S-1-5-5-0-1234'
+                -LogonId (New-Object -TypeName PSAccessToken.LUID)
             } | Should -Throw $expected
         }
 

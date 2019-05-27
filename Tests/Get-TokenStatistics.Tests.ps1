@@ -37,7 +37,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
             # Assert the values
             $actual.TokenId.GetType() | Should -Be ([PSAccessToken.LUID])
-            $actual.AuthenticationId.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual.AuthenticationId.GetType() | Should -Be ([PSAccessToken.LUID])
             $actual.ExpirationTime.GetType() | Should -Be ([System.Int64])
             $actual.ImpersonationLevel | Should -Be ([System.Security.Principal.TokenImpersonationLevel]::None)
             $actual.DynamicCharged.GetType() | Should -Be ([System.UInt32])
@@ -69,7 +69,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
             # Assert the values
             $actual.TokenId.GetType() | Should -Be ([PSAccessToken.LUID])
-            $actual.AuthenticationId.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual.AuthenticationId.GetType() | Should -Be ([PSAccessToken.LUID])
             $actual.ExpirationTime.GetType() | Should -Be ([System.Int64])
             $actual.ImpersonationLevel | Should -Be ([System.Security.Principal.TokenImpersonationLevel]::None)
             $actual.DynamicCharged.GetType() | Should -Be ([System.UInt32])
@@ -106,7 +106,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
             # Assert the values
             $actual.TokenId.GetType() | Should -Be ([PSAccessToken.LUID])
-            $actual.AuthenticationId.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual.AuthenticationId.GetType() | Should -Be ([PSAccessToken.LUID])
             $actual.ExpirationTime.GetType() | Should -Be ([System.Int64])
             $actual.ImpersonationLevel | Should -Be ([System.Security.Principal.TokenImpersonationLevel]::None)
             $actual.DynamicCharged.GetType() | Should -Be ([System.UInt32])

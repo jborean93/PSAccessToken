@@ -16,52 +16,47 @@ Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the elevation type for current process' {
-            $actual = Get-TokenElevationType
+        It 'Gets the elevation status for current process' {
+            $actual = Get-TokenElevation
 
-            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
-            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
+            $actual | Should -Be $true
         }
 
-        It 'Gets the elevation type based on a PID' {
-            $actual = Get-TokenElevationType -ProcessId $PID
+        It 'Gets the elevation status based on a PID' {
+            $actual = Get-TokenElevation -ProcessId $PID
 
-            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
-            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
+            $actual | Should -Be $true
         }
 
         It 'Gets the elevation based on an explicit token' {
             $h_token = Open-ProcessToken
             try {
-                $actual = Get-TokenElevationType -Token $h_token
+                $actual = Get-TokenElevation -Token $h_token
             } finally {
                 $h_token.Dispose()
             }
 
-            $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
-            $actual | Should -Be ([PSAccessToken.TokenElevationType]::Full)
+            $actual | Should -Be $true
         }
 
-        It 'Gets the elevation type for a default token' {
+        It 'Gets the elevation status for a default token' {
             $system_token = Get-SystemToken
             try {
                 Invoke-WithImpersonation -Token $system_token -ScriptBlock {
-                    $actual = Get-TokenElevationType
-                    $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
-                    $actual | Should -Be ([PSAccessToken.TokenElevationType]::Default)
+                    $actual = Get-TokenElevation
+                    $actual | Should -Be $true
                 }
             } finally {
                 $system_token.Dispose()
             }
         }
 
-        It 'Gets the elevation type for a limited token' {
+        It 'Gets the elevation status for a limited token' {
             $linked_token = Get-TokenLinkedToken
             try {
-                $actual = Get-TokenElevationType -Token $linked_token
+                $actual = Get-TokenElevation -Token $linked_token
 
-                $actual.GetType() | Should -Be ([PSAccessToken.TokenElevationType])
-                $actual | Should -Be ([PSAccessToken.TokenElevationType]::Limited)
+                $actual | Should -Be $false
             } finally {
                 $linked_token.Dispose()
             }

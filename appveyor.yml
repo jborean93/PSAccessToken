@@ -14,9 +14,6 @@ skip_commits:
   - README.md
   - CHANGELOG.md
 
-init:
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 # We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
 install:
 - ps: |

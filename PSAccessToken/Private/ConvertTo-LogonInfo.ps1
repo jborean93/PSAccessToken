@@ -67,7 +67,7 @@ Function ConvertTo-LogonInfo {
         Username = $Username
         Domain = $Domain
         LogonType = $LogonType
-        LogonId = ConvertTo-SecurityIdentifier -InputObject "S-1-5-5-$($LogonId.HighPart)-$($LogonId.LowPart)"
+        LogonId = $LogonId
         Profile = $null
 
         # Quota Limits

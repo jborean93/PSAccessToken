@@ -24,15 +24,17 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
         It 'Gets the token origin for current process' {
             $actual = Get-TokenOrigin
-            $actual.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual.GetType() | Should -Be ([PSAccessToken.LUID])
         }
 
         It 'Gets the token owner based on a PID' {
             $actual = Get-TokenOrigin -ProcessId $PID
-            $actual.GetType() | Should -Be ([System.Security.Principal.SecurityIdentifier])
+            $actual.GetType() | Should -Be ([PSAccessToken.LUID])
         }
 
         It 'Gets the token based on an explicit token' {
+            $expected = New-Object -TypeName PSAccessToken.LUID
+            $expected.LowPart = 999
             $user = ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
 
             $system_token = Get-SystemToken
@@ -41,7 +43,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                     $logon = Invoke-LogonUser -Username $user -Password $null
                     try {
                         $actual = Get-TokenOrigin -Token $logon.Token
-                        $actual | Should -Be 'S-1-5-5-0-999'  # We created it under the SYSTEM context.
+                        $actual | Should -Be $expected  # Created under the SYSTEM context.
                     } finally {
                         $logon.Token.Dispose()
                     }

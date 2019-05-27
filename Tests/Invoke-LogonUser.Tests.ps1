@@ -89,7 +89,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $entry_properties.Name[3] | Should -Be 'LogonType'
                 $entry_properties.TypeNameOfValue[3] | Should -Be 'PSAccessToken.LogonType'
                 $entry_properties.Name[4] | Should -Be 'LogonId'
-                $entry_properties.TypeNameOfValue[4] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+                $entry_properties.TypeNameOfValue[4] | Should -Be 'PSAccessToken.LUID'
                 $entry_properties.Name[5] | Should -Be 'Profile'
                 $entry_properties.TypeNameOfValue[5] | Should -Be 'PSAccessToken.InteractiveProfile'
                 $entry_properties.Name[6] | Should -Be 'PagedPoolLimit'
@@ -142,6 +142,24 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
                 $actual_user = Get-TokenUser -Token $actual.Token
                 $actual_user | Should -Be $AccountSid.Translate([System.Security.Principal.NTAccount])
+
+                $actual_elevation_type = Get-TokenElevationType -Token $actual.Token
+                $actual_elevation = Get-TokenElevation -Token $actual.Token
+                if ($Account -eq $standard_account) {
+                    $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
+                    $actual_elevation | Should -Be $false
+                } else {
+                    $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Limited)
+                    $actual_elevation | Should -Be $false
+
+                    $linked_token = Get-TokenLinkedToken -Token $actual.Token
+                    try {
+                        Get-TokenElevationType -Token $linked_token | Should -Be ([PSAccessToken.TokenElevationType]::Full)
+                        Get-TokenElevation -Token $linked_token | Should -Be $true
+                    } finally {
+                        $linked_token.Dispose()
+                    }
+                }
             } finally {
                 $actual.Token.Dispose()
             }

@@ -21,6 +21,7 @@ Function Get-TokenRestrictedSids {
 
     .OUTPUTS
     [PSAccessToken.SidAndAttributes]
+        Account - The NTAccount representation of the Sid.
         Sid - The security identifier of the group that is restricted.
         Attributes - Attributes of the group referenced by the Sid.
 

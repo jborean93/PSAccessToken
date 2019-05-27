@@ -1,14 +1,14 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenHasRestrictions {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Check if the access token has a filtered token available.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Check if the access token has a filtered token available. This restricted token can be retrieved with the
+    Get-TokenLinkedToken cmdlet.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,20 +20,20 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [System.Boolean] Whether there is a restricted token available or not.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the restriction token availability for the current process
+    Get-TokenHasRestrictions
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the restriction token availability for the process with the id 1234
+    Get-TokenHasRestrictions -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the restriction token availability for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenHasRestrictions -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -41,8 +41,12 @@ Function Get-TokenPrimaryGroup {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        "PSUseSingularNouns", "",
+        Justification="The actual object is called TOKEN_RESTRICTIONS"
+    )]
     Param (
         [Parameter(ParameterSetName="Token")]
         [System.Runtime.InteropServices.SafeHandle]
@@ -57,13 +61,13 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::Elevation) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
+        $hash_rest_bytes = New-Object -TypeName System.Byte[] -ArgumentList $TokenInfoLength
+        [System.Runtime.InteropServices.Marshal]::Copy(
+            $TokenInfo, $hash_rest_bytes, 0, $hash_rest_bytes.Length
         )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        return [System.BitConverter]::ToBoolean($hash_rest_bytes, 0)
     }
 }

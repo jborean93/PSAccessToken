@@ -40,7 +40,7 @@ Function Get-TokenUser {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.SecurityIdentifier])]
+    [OutputType([System.Security.Principal.NTAccount])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -60,10 +60,9 @@ Function Get-TokenUser {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
         $token_user = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo,
-            [Type][PSAccessToken.TOKEN_USER]
+            $TokenInfo, [Type][PSAccessToken.TOKEN_USER]
         )
-        $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $token_user.User.Sid
+        $sid = ConvertTo-SecurityIdentifier -InputObject $token_user.User.Sid
         ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
     }
 }

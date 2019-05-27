@@ -24,7 +24,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $entry_properties = $actual[0].PSObject.Properties
             $entry_properties.Value.Count | Should -Be 24
             $entry_properties.Name[0] | Should -Be 'LogonId'
-            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $entry_properties.TypeNameOfValue[0] | Should -Be 'PSAccessToken.LUID'
             $entry_properties.Name[1] | Should -Be 'LogonType'
             $entry_properties.TypeNameOfValue[1] | Should -Be 'PSAccessToken.LogonType'
             $entry_properties.Name[2] | Should -Be 'Session'
@@ -66,29 +66,33 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
         It 'Gets the logon session data for a specific id' {
             $system_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-18'
-            $logon_sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-5-0-999'
+            $logon_id = New-Object -TypeName PSAccessToken.LUID
+            $logon_id.LowPart = 999
 
-            $actual = Get-LogonSessionData -LogonId $logon_sid
+            $actual = Get-LogonSessionData -LogonId $logon_id
             $actual.Sid | Should -Be $system_sid
-            $actual.LogonId | Should -Be $logon_sid
+            $actual.LogonId | Should -Be $logon_id
         }
 
         It 'Fails with invalid logon id' {
             $expected = 'Failed to get LSA logon session data: A specified logon session does not exist. '
             $expected += 'It may already have been terminated (Win32 ErrorCode 1312 - 0x00000520)'
-            { Get-LogonSessionData -LogonId 'S-1-5-5-0-0' } | Should -Throw $expected
+            { Get-LogonSessionData -LogonId (New-Object -TypeName PSAccessToken.LUID) } | Should -Throw $expected
         }
 
         It 'Gets a logon session for the <Account> logon' -TestCases @(
-            @{ Account = 'System'; Sid = 'S-1-5-18'; LogonSid = 'S-1-5-5-0-999' },
-            @{ Account = 'Network Service'; Sid = 'S-1-5-20'; LogonSid = 'S-1-5-5-0-996' },
-            @{ Account = 'Local Service'; Sid = 'S-1-5-19'; LogonSid = 'S-1-5-5-0-997' }
+            @{ Account = 'System'; Sid = 'S-1-5-18'; LogonId = 999 },
+            @{ Account = 'Network Service'; Sid = 'S-1-5-20'; LogonId = 996 },
+            @{ Account = 'Local Service'; Sid = 'S-1-5-19'; LogonId = 997 }
         ) {
             Param (
                 [System.String]$Account,
                 [System.Security.Principal.SecurityIdentifier]$Sid,
-                [System.Security.Principal.SecurityIdentifier]$LogonSid
+                $LogonId
             )
+
+            $expected_id = New-Object -TypeName PSAccessToken.LUID
+            $expected_id.LowPart = $LogonId
 
             $system_token = Get-SystemToken
             try {
@@ -102,7 +106,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
                         $entry_properties.Value.Count | Should -Be 24
 
                         $actual.Sid | Should -Be $Sid
-                        $actual.LogonId | Should -Be $LogonSid
+                        $actual.LogonId | Should -Be $expected_id
                     } finally {
                         $logon.Token.Dispose()
                     }

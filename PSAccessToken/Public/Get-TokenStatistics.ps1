@@ -21,7 +21,7 @@ Function Get-TokenStatistics {
     .OUTPUTS
     [PSAccessToken.TokenStatistics]
         TokenId - LUID the identifies the access token.
-        AuthenticationId - A SID that represents the LUID assigned to the logon session of the token.
+        AuthenticationId: The LSA Logon ID that represents the locally unique identifier of the logon session.
         ExpirationTime - When the token expires (this is not currently supported by Windows)
         ImpersonationLevel - Whether the token is a primary or impersonation token, and the type of impersonation used.
         DynamicCharged - The number of bytes in memory for storing the default protection and primary group id.
@@ -76,23 +76,11 @@ Function Get-TokenStatistics {
             $TokenInfo, [Type][PSAccessToken.TOKEN_STATISTICS]
         )
 
-        # Map the TokenType and ImpersonationLevel to the TokenImpersonationLevel enum
-        if ($token_statistics.TokenType -eq [PSAccessToken.TokenType]::Primary) {
-            $imp_level = [System.Security.Principal.TokenImpersonationLevel]::None
-        } else {
-            $imp_level = switch($token_statistics.ImpersonationLevel) {
-                Anonymous { [System.Security.Principal.TokenImpersonationLevel]::Anonymous }
-                Identification { [System.Security.Principal.TokenImpersonationLevel]::Identification }
-                Impersonation { [System.Security.Principal.TokenImpersonationLevel]::Impersonation }
-                Delegation { [System.Security.Principal.TokenImpersonationLevel]::Delegation }
-            }
-        }
-
-        $auth_id = "S-1-5-5-$($token_statistics.AuthenticationId.HighPart)-$($token_statistics.AuthenticationId.LowPart)"
+        $imp_level = Get-ImpersonationLevel -TokenType $token_statistics.TokenType -SecurityImpersonationLevel $token_statistics.ImpersonationLevel
         [PSCustomObject]@{
             PSTypeName = 'PSAccessToken.TokenStatistics'
             TokenId = $token_statistics.TokenId
-            AuthenticationId = ConvertTo-SecurityIdentifier -InputObject $auth_id
+            AuthenticationId = $token_statistics.AuthenticationId
             ExpirationTime = $token_statistics.ExpirationTime
             ImpersonationLevel = $imp_level
             DynamicCharged = $token_statistics.DynamicCharged

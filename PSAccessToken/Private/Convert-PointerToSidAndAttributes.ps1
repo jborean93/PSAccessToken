@@ -36,7 +36,7 @@ Function Convert-PointerToSidAndAttributes {
             $Ptr, [Type][PSAccessToken.SID_AND_ATTRIBUTES]
         )
 
-        $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $sid_and_attributes.Sid
+        $sid = ConvertTo-SecurityIdentifier -InputObject $sid_and_attributes.Sid
         [PSCustomObject]@{
             PSTypeName = 'PSAccessToken.SidAndAttributes'
             Account = ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour Empty

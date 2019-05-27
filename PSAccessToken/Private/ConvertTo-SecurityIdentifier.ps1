@@ -14,6 +14,7 @@ Function ConvertTo-SecurityIdentifier {
         String - A string that either represents a SID or SecurityIdentifier
         NTAccount - An NTAccount object
         SecurityIdentifier - No conversion takes place but it will just output this back
+        IntPtr - A pointer to an unmanaged memory of a SID.
 
     .EXAMPLE
     ConvertTo-SecurityIdentifier -InputObject System
@@ -30,6 +31,10 @@ Function ConvertTo-SecurityIdentifier {
         foreach ($obj in $InputObject) {
             if ($obj -is [System.Security.Principal.IdentityReference]) {
                 Write-Output -InputObject ($obj.Translate([System.Security.Principal.SecurityIdentifier]))
+            } elseif ($obj -is [System.IntPtr]) {
+                if ($obj -ne [System.IntPtr]::Zero) {
+                    Write-Output -InputObject (New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $obj)
+                }
             } else {
                 $obj = $obj.ToString()
 

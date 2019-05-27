@@ -36,9 +36,9 @@ Function ConvertFrom-SecurityIdentifier {
             'S-1-16-16384' { return New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList 'Mandatory Label', 'System Mandatory Label' }
         }
     } elseif ($Sid.Value.StartsWith('S-1-5-5-')) {
-        # .Translate() fails on Logon IDs, create our own
+        # .Translate() fails on Logon SIDs, create our own
         $logon_id = $Sid.Value.Substring(8)
-        return New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList 'NT AUTHORITY', "Logon Session ID $logon_id"
+        return New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList 'NT AUTHORITY', "LogonSessionId_$logon_id"
     }
 
     try {

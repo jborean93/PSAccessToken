@@ -24,7 +24,7 @@ Function Get-LogonSessionData {
 
     .OUTPUTS
     [PSAccessToken.LogonSessionData]
-        LogonId: The SID that represents the locally unique identifier of the logon session.
+        LogonId: The LSA Logon ID that represents the locally unique identifier of the logon session.
         LogonType: The logon type that identifies the logon method.
         Session: The Windows session identifier.
         Sid: The SID of the user.
@@ -84,20 +84,18 @@ Function Get-LogonSessionData {
         $ThreadId,
 
         [Parameter(ParameterSetName="LogonId")]
-        [System.Security.Principal.SecurityIdentifier]
+        [PSAccessToken.LUID]
         $LogonId
     )
 
     if ($PSCmdlet.ParameterSetName -ne "LogonId") {
         # Get the LogonId from the TOKEN_STATISTICS of the access token.
-        $token_stats = Get-TokenStatistics @PSBoundParameters
-        $LogonId = $token_stats.AuthenticationId
+        $LogonId = (Get-TokenStatistics @PSBoundParameters).AuthenticationId
     }
-    $logon_id = Convert-SidToLogonId -InputObject $LogonId
 
     $session_data_ptr = [System.IntPtr]::Zero
     $res = [PSAccessToken.NativeMethods]::LsaGetLogonSessionData(
-        [Ref]$logon_id,
+        [Ref]$LogonId,
         [Ref]$session_data_ptr
     )
 
@@ -113,10 +111,10 @@ Function Get-LogonSessionData {
 
         $output = [PSCustomObject]@{
             PSTypeName = 'PSAccessToken.LogonSessionData'
-            LogonId = ConvertTo-SecurityIdentifier -InputObject "S-1-5-5-$($session_data.LogonId.HighPart)-$($session_data.LogonId.LowPart)"
+            LogonId = $session_data.LogonId
             LogonType = $session_data.LogonType
             Session = $session_data.Session
-            Sid = (New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $session_data.Sid)
+            Sid = ConvertTo-SecurityIdentifier -InputObject $session_data.Sid
             UserFlags = $session_data.UserFlags
         }
 

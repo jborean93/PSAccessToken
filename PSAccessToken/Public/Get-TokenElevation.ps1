@@ -1,14 +1,13 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenElevation {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Gets the access token elevation status.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Check if an access token is elevated or not.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,20 +19,20 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [System.Boolean] Whether the token is elevated or not.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the elevation status for the current process
+    Get-TokenElevation
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the elevation status for the process with the id 1234
+    Get-TokenElevation -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the elevation status for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenElevation -Token $h_token
         } finally {
             $h_token.Dispose()
         }
@@ -41,7 +40,7 @@ Function Get-TokenPrimaryGroup {
         $h_process.Dispose()
     }
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -57,13 +56,12 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::Elevation) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
+        $token_elevation = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
+            $TokenInfo, [Type][PSAccessToken.TOKEN_ELEVATION]
         )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        return $token_elevation.TokenIsElevated
     }
 }

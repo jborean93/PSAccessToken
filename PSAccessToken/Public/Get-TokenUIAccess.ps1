@@ -1,14 +1,13 @@
 # Copyright: (c) 2019, Jordan Borean (@jborean93) <jborean93@gmail.com>
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
-Function Get-TokenPrimaryGroup {
+Function Get-TokenUIAccess {
     <#
     .SYNOPSIS
-    Get the primary group of the access token.
+    Check if the access token has the UIAccess flag set.
 
     .DESCRIPTION
-    Gets the primary gorup of an access token, this is the default SID applied to the group entry on a newly created
-    object.
+    Check if the access token has the UIAccess flag set.
 
     .PARAMETER Token
     An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
@@ -20,28 +19,33 @@ Function Get-TokenPrimaryGroup {
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
     .OUTPUTS
-    The NTAccount of the primary group of the access token.
+    [System.Boolean] Whether the token is elevated or not.
 
-    .EXAMPLE Gets the primary group for the current process
-    Get-TokenPrimaryGroup
+    .EXAMPLE Gets the UIAccess status for the current process
+    Get-TokenUIAccess
 
-    .EXAMPLE Gets the primary group for the process with the id 1234
-    Get-TokenPrimaryGroup -ProcessId 1234
+    .EXAMPLE Gets the UIAccess status for the process with the id 1234
+    Get-TokenUIAccess -ProcessId 1234
 
-    .EXAMPLE Gets the primary group for an existing token handle
+    .EXAMPLE Gets the UIAccess status for an existing token handle
     $h_process = Get-ProcessHandle -ProcessId 1234
     try {
         $h_token = Open-ProcessToken -Process $h_process
         try {
-            Get-TokenPrimaryGroup -Token $h_token
+            Get-TokenUIAccess -Token $h_token
         } finally {
             $h_token.Dispose()
         }
     } finally {
         $h_process.Dispose()
     }
+
+    .NOTES
+    UIAccess is a flag that allows a token to bypass the User Interface Privilege Isolation (UIPI) restrictions when
+    an application is elevated from a standard user to an administrator. When set, the token can interchange
+    information with applications that are running at a higher privilege level, such as logon prompts and UAC prompts.
     #>
-    [OutputType([System.Security.Principal.NTAccount])]
+    [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
         [Parameter(ParameterSetName="Token")]
@@ -57,13 +61,11 @@ Function Get-TokenPrimaryGroup {
         $ThreadId
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::PrimaryGroup) -Process {
+    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::UIAccess) -Process {
         Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_group = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_PRIMARY_GROUP]
-        )
-        $sid = ConvertTo-SecurityIdentifier -InputObject $token_group.PrimaryGroup
-        ConvertFrom-SecurityIdentifier -Sid $sid -ErrorBehaviour PassThru
+        $ui_access = New-Object -TypeName byte[] -ArgumentList $TokenInfoLength
+        [System.Runtime.InteropServices.Marshal]::Copy($TokenInfo, $ui_access, 0, $ui_access.Length)
+        [System.BitConverter]::ToBoolean($ui_access, 0)
     }
 }

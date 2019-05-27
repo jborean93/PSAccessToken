@@ -31,7 +31,7 @@ Function New-AccessToken {
         Integrity - Use the -IntegrityLabel parameter instead
         IntegrityEnabled - Use the -IntegrityLabel parameter instead
         Resource - A domain-local group
-        LogonId - Identifies a logon session associated with an access token
+        LogonId - Identifies the LSA logon session associated with an access token
 
     .PARAMETER Privileges
     A list of privileges to set on the new token. This can either be a list of privileges or a list of hashtables with
@@ -72,11 +72,12 @@ Function New-AccessToken {
 
     .PARAMETER IntegrityLabel
     The integrity label for the token. This is automatically added as a group with the 'Integrity' and
-    'IntegrityEnabled' attributes. The default is 'High'.
+    'IntegrityEnabled' attributes. The default is 'High'. While the integrity label is applied, the access token will
+    not have any mandatory policy set.
 
     .PARAMETER LogonId
-    Set the LogonId of the token. This must be a valid LogonId already created by Windows. Defaults
-    to the LogonId of the current process token.
+    Set the LSA Logon ID of the token. This must be a valid Logon ID already created by Windows. Defaults to the Logon
+    ID of the current process token.
 
     .PARAMETER ExpirationTime
     Sets the expiration time of the token. This is not currently supported by Windows.
@@ -90,7 +91,7 @@ Function New-AccessToken {
     New-AccessToken -User 'SYSTEM' `
         -Groups 'Administrators' `
         -Privileges 'SeTcbPrivilege', 'SeRestorePrivilege', 'SeBackupPrivilege' `
-        -LogonId $logon_id  # This isn't necessary but here for posterities sake
+        -LogonId $logon_id  # This isn't necessary but here for posterity sake
 
     .EXAMPLE Create a token with explicit owner and DACL
     New-AccessToken -User 'Guest' `
@@ -146,7 +147,7 @@ Function New-AccessToken {
         [System.String]
         $IntegrityLabel = 'High',
 
-        [System.Security.Principal.SecurityIdentifier]
+        [PSAccessToken.LUID]
         $LogonId,
 
         [System.Int64]
@@ -265,7 +266,7 @@ Function New-AccessToken {
     if ($null -eq $LogonId) {
         $LogonId = (Get-TokenStatistics).AuthenticationId
     }
-    $variables.logon_id = Convert-SidToLogonId -InputObject $LogonId
+    $variables.logon_id = $LogonId
 
     # TOKEN_SOURCE does not require it's own Ptr, just set first
     $token_source = New-Object -TypeName PSAccessToken.TOKEN_SOURCE
