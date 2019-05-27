@@ -54,7 +54,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual.Privileges.Length | Should -Be $privilege_count
         }
 
-        It 'Gets the token statistics based on a PID' {
+        It 'Gets the token access information based on a PID' {
             $actual = Get-TokenAccessInformation -ProcessId $PID
 
             $group_count = (Get-TokenGroups).Length
@@ -136,7 +136,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
             $actual.Privileges.Length | Should -Be $privilege_count
         }
 
-        It 'Gets the token statistics for impersonation <Level> token' -TestCases @(
+        It 'Gets the token access information for impersonation <Level> token' -TestCases @(
             @{ Level = [System.Security.Principal.TokenImpersonationLevel]::Anonymous },
             @{ Level = [System.Security.Principal.TokenImpersonationLevel]::Identification },
             @{ Level = [System.Security.Principal.TokenImpersonationLevel]::Impersonation },
@@ -152,6 +152,28 @@ Describe "$cmdlet_name PS$ps_version tests" {
             } finally {
                 $h_token.Dispose()
             }
+        }
+
+        It 'Gets the token access information for a LowBox token' {
+            $h_token = New-LowBoxToken -AppContainer 'TestContainer' -Capabilities @(
+                'S-1-15-3-3215430884-1339816292-89257616-1145831019',
+                'S-1-15-3-3845273463-1331427702-1186551195-114810997'
+            )
+            try {
+                $actual = Get-TokenAccessInformation -Token $h_token
+                $app_container_number = Get-TokenAppContainerNumber -Token $h_token
+            } finally {
+                $h_token.Dispose()
+            }
+
+            $actual.AppContainerNumber | Should -Not -Be 0
+            $actual.AppContainerNumber | Should -Be $app_container_number
+            $actual.PackageSid | Should -Not -Be $null
+            $actual.CapabilitiesHash.Sids.Length | Should -Be 2
+            $actual.CapabilitiesHash.Sids[0].Sid | Should -Be 'S-1-15-3-3215430884-1339816292-89257616-1145831019'
+            $actual.CapabilitiesHash.Sids[0].Attributes | Should -Be 'Enabled'
+            $actual.CapabilitiesHash.Sids[1].Sid | Should -Be 'S-1-15-3-3845273463-1331427702-1186551195-114810997'
+            $actual.CapabilitiesHash.Sids[1].Attributes | Should -Be 'Enabled'
         }
     }
 }

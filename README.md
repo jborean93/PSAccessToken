@@ -19,6 +19,7 @@ Cmdlets included with this module are;
 * `Invoke-LogonUser`: Logs on an account through LSA and returns the access token and other logon info back.
 * `Invoke-WithImpersonation`: Invokes a scriptblock like [Invoke-Command](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/invoke-command?view=powershell-6) but under the security context of an access token.
 * `New-AccessToken`: Creates a new access token with any combination of user, groups, privileges, etc.
+* `New-LowBoxToken`: Creates a copy of an existing token as a "Low Box" token with a Low integrity level and set of Capabilities.
 * `New-RestrictedToken`: Creates a restricted copy of an existing access token, with various groups or privileges, removed or restricted.
 * `Open-ProcessToken`: Opens a process handle to get the access token inside.
 * `Open-ThreadToken`: Opens a thread handle to get the access token inside.

@@ -37,5 +37,46 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
             $actual | Should -Be $null
         }
+
+        It 'Gets the token capabilities for AppContainer without capabilities' {
+            $h_token = New-LowBoxToken -AppContainer 'TestContainer' -Capabilities @()
+            try {
+                $actual = Get-TokenCapabilities -Token $h_token
+            } finally {
+                $h_token.Dispose()
+            }
+
+            $actual | Should -Be $null
+        }
+
+        It 'Gets the token capabilities for AppContainer with capabilities' {
+            $h_token = New-LowBoxToken -AppContainer 'TestContainer' -Capabilities @(
+                'S-1-15-3-3215430884-1339816292-89257616-1145831019',
+                'S-1-15-3-3845273463-1331427702-1186551195-114810997'
+            )
+            try {
+                $actual = Get-TokenCapabilities -Token $h_token
+            } finally {
+                $h_token.Dispose()
+            }
+
+            $actual.Length | Should -Be 2
+            $actual[0].GetType() | Should -Be ([System.Management.Automation.PSCustomObject])
+            $actual[0].GetType().FullName | Should -Be 'System.Management.Automation.PSCustomObject'
+            $actual[0].PSObject.TypeNames[0] | Should -Be 'PSAccessToken.SidAndAttributes'
+            $entry_properties = $actual[0].PSObject.Properties
+            $entry_properties.Value.Count | Should -Be 3
+            $entry_properties.Name[0] | Should -Be 'Account'
+            $entry_properties.TypeNameOfValue[0] | Should -Be 'System.String'
+            $entry_properties.Name[1] | Should -Be 'Sid'
+            $entry_properties.TypeNameOfValue[1] | Should -Be 'System.Security.Principal.SecurityIdentifier'
+            $entry_properties.Name[2] | Should -Be 'Attributes'
+            $entry_properties.TypeNameOfValue[2] | Should -Be 'PSAccessToken.TokenGroupAttributes'
+
+            $actual[0].Sid | Should -Be 'S-1-15-3-3215430884-1339816292-89257616-1145831019'
+            $actual[0].Attributes | Should -Be 'Enabled'
+            $actual[1].Sid | Should -Be 'S-1-15-3-3845273463-1331427702-1186551195-114810997'
+            $actual[1].Attributes | Should -Be 'Enabled'
+        }
     }
 }

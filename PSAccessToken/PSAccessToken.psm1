@@ -1198,6 +1198,16 @@ $type_builder = $module_builder.DefineType(
         SetLastError = $true
     },
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/userenv/nf-userenv-deleteappcontainerprofile
+        DllName = 'Userenv.dll'
+        Name = 'DeriveAppContainerSidFromAppContainerName'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.String],
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-duplicatetokenex
         DllName = 'Advapi32.dll'
         Name = 'DuplicateTokenEx'
@@ -1211,6 +1221,15 @@ $type_builder = $module_builder.DefineType(
             @{ Ref = $true; Type = [PInvokeHelper.SafeNativeHandle] }
         )
         SetLastError = $true
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/securitybaseapi/nf-securitybaseapi-freesid
+        DllName = 'Advapi32.dll'
+        Name = 'FreeSid'
+        ReturnType = ([System.Void])
+        ParameterTypes = @(
+            [System.IntPtr]
+        )
     },
     @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess
@@ -1386,6 +1405,23 @@ $type_builder = $module_builder.DefineType(
             [PSAccessToken.LSA_STRING],
             @{ Ref = $true; Type = [System.IntPtr] },
             @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
+        # Undocumented, added in Windows 8
+        DllName = 'ntdll.dll'
+        Name = 'NtCreateLowBoxToken'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            @{ Ref = $true; Type = [PInvokeHelper.SafeNativeHandle] },
+            [PInvokeHelper.SafeNativeHandle],
+            [System.Security.Principal.TokenAccessLevels],
+            [PSAccessToken.OBJECT_ATTRIBUTES],
+            [System.IntPtr],
+            [System.UInt32],
+            [System.IntPtr],
+            [System.UInt32],
+            [System.IntPtr[]]
         )
     },
     @{

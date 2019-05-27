@@ -20,18 +20,22 @@ Function Get-TokenAccessInformation {
 
     .OUTPUTS
     [PSAccessToken.TokenAccessInformation]
-        SidHash:
+        SidHash: Contains the following keys
+            Hash: The hash value of Sids, this is UInt32 array of 32 elements.
+            Sids: A PSAccessToken.SidAndAttributes object of the tokens groups.
         RestrictedSidHash:
-        Privileges:
+            Hash: The hash value of Sids, this is UInt32 array of 32 elements.
+            Sids: A PSAccessToken.SidAndAttributes object of the tokens restricted groups.
+        Privileges: A PSAccessToken.PrivilegeAndAttributes of the tokens privileges.
         AuthenticationId: The LSA Logon ID that represents the locally unique identifier of the logon session.
-        ImpersonationLevel:
-        MandatoryPolicy:
-        Flags:
-        AppContainerNUmber:
-        PackageSid:
+        ImpersonationLevel: The tokens type and impersonation level.
+        MandatoryPolicy: The tokens mandatory policy level.
+        AppContainerNumber: The tokens AppContainer number, set to 0 if not an AppContainer.
+        PackageSid: The AppContainer package SID.
         CapabilitiesHash:
-        TrustLevelSid:
-        SecurityAttributes:
+            Hash: The hash value of Sids, this is UInt32 array of 32 elements.
+            Sids: A PSAccessToken.SidAndAttributes object of the tokens capabilities.
+        TrustLevelSid: The protected process trust level of the token.
 
     .EXAMPLE Gets the access information for the current process
     Get-TokenAccessInformation

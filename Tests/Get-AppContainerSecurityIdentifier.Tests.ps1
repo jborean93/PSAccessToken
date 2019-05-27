@@ -10,33 +10,15 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
-. $PSScriptRoot\TestUtils.ps1
+. $PSScriptRoot\..\$module_name\Private\$cmdlet_name.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the is appcontainer for current process' {
-            $actual = Get-TokenIsAppContainer
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the is appcontainer enabled based on a PID' {
-            $actual = Get-TokenIsAppContainer -ProcessId $PID
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the is appcontainer enabled based on an explicit token' {
-            $h_token = Open-ProcessToken
-            try {
-                $actual = Get-TokenIsAppContainer -Token $h_token
-            } finally {
-                $h_token.Dispose()
-            }
-
-            $actual | Should -Be $false
+        It 'Should fail with invalid name' {
+            $expected = "Failed to derive AppContainer SID from name '`0Fake!': The parameter is incorrect (Win32 ErrorCode 87 - 0x00000057)"
+            { Get-AppContainerSecurityIdentifier -Name "`0Fake!" } | Should -Throw $expected
         }
     }
 }
