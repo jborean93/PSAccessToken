@@ -15,7 +15,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        
         $it_params = @{}
         $os_version = [Version](Get-Item -LiteralPath "$env:SystemRoot\System32\kernel32.dll").VersionInfo.ProductVersion
         if ($os_version -lt [Version]"10.0.16299") {
