@@ -4,7 +4,7 @@ environment:
   NuGetApiKey:
     secure: VMvVbhuMaUTbI8WgnJH/WF7UBGwj261AgERGm25s21zQErHoIdwacoF3yd6OjIWh
 
-image: Visual Studio 2019
+image: Visual Studio 2017
 
 # specify the cloned folder in upper case so the PSGallery upload is in this format
 clone_folder: c:\projects\PSAccessToken
