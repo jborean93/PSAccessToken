@@ -1,5 +1,6 @@
 # Publish to PowerShell Gallery with this key
 environment:
+  APPVEYOR_RDP_PASSWORD: Fj00!mx9Wesu9Mu#
   NuGetApiKey:
     secure: VMvVbhuMaUTbI8WgnJH/WF7UBGwj261AgERGm25s21zQErHoIdwacoF3yd6OjIWh
 
@@ -13,6 +14,10 @@ skip_commits:
   files:
   - README.md
   - CHANGELOG.md
+
+# Seems like the reboot only works if I enabled RDP
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 # We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
 install:
