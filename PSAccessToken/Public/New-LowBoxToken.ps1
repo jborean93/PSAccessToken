@@ -19,6 +19,9 @@ Function New-LowBoxToken {
     .PARAMETER ThreadId
     Copies the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER AppContainer
     The name of an AppContainer package or an explicit SID to use as the package identifier of the Low Box token.
 
@@ -51,6 +54,10 @@ Function New-LowBoxToken {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(Mandatory=$true)]
         [System.String]

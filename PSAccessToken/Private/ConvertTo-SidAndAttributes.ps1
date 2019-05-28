@@ -42,6 +42,16 @@ Function ConvertTo-SidAndAttributes {
             if ($InputObject.ContainsKey('Attributes')) {
                 $attributes = $InputObject.Attributes
             }
+        } elseif ($InputObject -is [System.Management.Automation.PSCustomObject]) {
+            $properties = $InputObject.PSObject.Properties.Name
+            if ('Sid' -notin $properties){
+                throw "Groups entry does not contain key 'Sid'"
+            }
+            $sid = $InputObject.Sid
+
+            if ('Attributes' -in $properties) {
+                $attributes = $InputObject.Attributes
+            }
         } else {
             $sid = $InputObject
         }

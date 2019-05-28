@@ -20,6 +20,9 @@ Function Get-TokenIsAppContainer {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [System.Boolean] Whether the token is an app container token.
 
@@ -55,7 +58,11 @@ Function Get-TokenIsAppContainer {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
     Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::IsAppContainer) -Process {

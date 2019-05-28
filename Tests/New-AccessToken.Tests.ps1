@@ -11,7 +11,6 @@ $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
 . $PSScriptRoot\..\$module_name\Private\ConvertTo-SecurityIdentifier.ps1
-. $PSScriptRoot\TestUtils.ps1
 
 $user_sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
 $user_name = $user_sid.Translate([System.Security.Principal.NTAccount])
@@ -30,7 +29,9 @@ $admin_name = $admin_sid.Translate([System.Security.Principal.NTAccount])
 
 # The tests require the SeCreateTokenPrivilege which we don't have. This function will get a token with this
 # privilege which we use to impersonate each test with.
-$elevated_token = Get-TokenWithPrivilege -Privileges 'SeCreateTokenPrivilege'
+$elevated_token = Invoke-WithPrivilege -Privilege 'SeCreateTokenPrivilege' -ScriptBlock {
+    Copy-AccessToken
+}
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
@@ -77,7 +78,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_type = Get-TokenType -Token $h_token
                 $actual_impersonation = Get-TokenImpersonationLevel -Token $h_token
                 $actual_statistics = Get-TokenStatistics -Token $h_token
-                $actual_elevation_type = Get-TokenElevationType -Token $h_token
                 $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $system_name
@@ -111,7 +111,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
 
                 $actual_statistics.AuthenticationId | Should -Be $token_stats.AuthenticationId
                 $actual_statistics.ExpirationTime | Should -Be 0
-                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
                 $actual_elevation | Should -Be $true
             } finally {
                 $h_token.Dispose()
@@ -132,7 +131,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_owner = Get-TokenOwner -Token $h_token
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
-                $actual_elevation_type = Get-TokenElevationType -Token $h_token
                 $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $user_name
@@ -160,7 +158,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_default_dacl.Item(1).AceFlags | Should -Be 'None'
                 $actual_default_dacl.Item(1).AceType | Should -Be 'AccessAllowed'
                 $actual_default_dacl.Item(1).SecurityIdentifier | Should -Be $system_sid
-                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
                 $actual_elevation | Should -Be $true
             } finally {
                 $h_token.Dispose()
@@ -180,7 +177,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_owner = Get-TokenOwner -Token $h_token
                 $actual_primary_group = Get-TokenPrimaryGroup -Token $h_token
                 $actual_default_dacl = Get-TokenDefaultDacl -Token $h_token
-                $actual_elevation_type = Get-TokenElevationType -Token $h_token
                 $actual_elevation = Get-TokenElevation -Token $h_token
 
                 $actual_user | Should -Be $user_name
@@ -207,7 +203,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual_default_dacl.Item(1).AceFlags | Should -Be 'None'
                 $actual_default_dacl.Item(1).AceType | Should -Be 'AccessAllowed'
                 $actual_default_dacl.Item(1).SecurityIdentifier | Should -Be $system_sid
-                $actual_elevation_type | Should -Be ([PSAccessToken.TokenElevationType]::Default)
                 $actual_elevation | Should -Be $false
             } finally {
                 $h_token.Dispose()

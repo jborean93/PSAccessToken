@@ -23,6 +23,9 @@ Function Use-ImplicitToken {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER Process
     The scriptblock to execute which has the implicit token passed in with the -Token parameter.
 
@@ -48,6 +51,10 @@ Function Use-ImplicitToken {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(Mandatory=$true)]
         [ScriptBlock]
@@ -89,15 +96,19 @@ Function Use-ImplicitToken {
             } elseif ($PSCmdlet.ParameterSetName -eq 'TID') {
                 $Token = Open-ThreadToken -Thread $h_pid_tid @open_params
             } else {
-                # Try to open the current thread, fallback to the process token if impersonation is not used.
-                try {
-                    $Token = Open-ThreadToken @open_params
-                } catch {
-                    if ($_.Exception.Message.EndsWith('(Win32 ErrorCode 1008 - 0x000003F0)')) {
-                        $Token = Open-ProcessToken @open_params
-                    } else {
-                        throw $_
+                if (-not $UseProcessToken.IsPresent) {
+                    try {
+                        $Token = Open-ThreadToken @open_params
+                    } catch {
+                        # Fallback to opening the process token if the current thread isn't run under impersonation.
+                        if (-not $_.Exception.Message.EndsWith('(Win32 ErrorCode 1008 - 0x000003F0)')) {
+                            throw $_
+                        }
                     }
+                }
+
+                if ($null -eq $Token) {
+                    $Token = Open-ProcessToken @open_params
                 }
             }
         }

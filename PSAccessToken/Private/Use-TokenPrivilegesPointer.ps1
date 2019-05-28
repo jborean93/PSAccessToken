@@ -72,6 +72,16 @@ Function Use-TokenPrivilegesPointer {
             if ($Privilege.ContainsKey('Attributes')) {
                 $attributes = $Privilege.Attributes
             }
+        } elseif ($Privilege -is [System.Management.Automation.PSCustomObject]) {
+            $properties = $Privilege.PSObject.Properties.Name
+            if ('Name' -notin $properties){
+                throw "Privileges entry does not contain key 'Name'"
+            }
+            $name = $Privilege.Name
+
+            if ('Attributes' -in $properties) {
+                $attributes = $Privilege.Attributes
+            }
         } else {
             $name = $Privilege.ToString()
         }

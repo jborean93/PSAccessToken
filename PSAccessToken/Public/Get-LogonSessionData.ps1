@@ -19,6 +19,9 @@ Function Get-LogonSessionData {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER LogonId
     Instead of using the current process, you can get the logon session data for a specific logon Id.
 
@@ -82,6 +85,10 @@ Function Get-LogonSessionData {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(ParameterSetName="LogonId")]
         [PSAccessToken.LUID]

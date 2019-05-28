@@ -11,7 +11,7 @@ Function Use-LsaLogon {
 
     .PARAMETER Process
     The scriptblock to run. This should have 2 parameters;
-        [System.IntPtr]$LsaHandle - The openned LSA handle.
+        [System.IntPtr]$LsaHandle - The opened LSA handle.
         [Hashtable]$Variables - The variables passed in through the -Variables parameter.
 
     .PARAMETER Variables
@@ -22,7 +22,7 @@ Function Use-LsaLogon {
 
     .EXAMPLE
     Use-LsaLogon -Process {
-        Param ([System.IntPtr]$LsaHandle, [Hashtable]$Variables, [Switch]$Trusted)
+        Param ([System.IntPtr]$LsaHandle, [Hashtable]$Variables)
     }
 
     .NOTES

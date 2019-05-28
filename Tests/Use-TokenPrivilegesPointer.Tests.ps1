@@ -40,5 +40,32 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $actual[1].Attributes | Should -Be 'EnabledByDefault, Enabled'
             }
         }
+
+        It 'Should use PSCustomObject as input' {
+            @(
+                [PSCustomObject]@{ Name = 'SeRestorePrivilege'; Attributes = 'Enabled' },
+                [PSCustomObject]@{ Name = 'SeBackupPrivilege' }
+            ) | Use-TokenPrivilegesPointer -Process {
+                Param ([System.IntPtr]$Ptr)
+
+                $actual = Convert-PointerToTokenPrivileges -Ptr $Ptr
+
+                $actual.Length | Should -Be 2
+                $actual[0].Name | Should -Be 'SeRestorePrivilege'
+                $actual[0].Attributes | Should -Be 'Enabled'
+                $actual[1].Name | Should -Be 'SeBackupPrivilege'
+                $actual[1].Attributes | Should -Be 'EnabledByDefault, Enabled'
+            }
+        }
+
+        It 'Should fail without Name of Hashtable' {
+            $expected = "Privileges entry does not contain key 'Name'"
+            { @( @{ Attributes = 'Enabled' } ) | Use-TokenPrivilegesPointer -Process {} } | Should -Throw $expected
+        }
+
+        It 'Should fail without Name of PSCustomObject' {
+            $expected = "Privileges entry does not contain key 'Name'"
+            { @( [PSCustomObject]@{ Attributes = 'Enabled' } ) | Use-TokenPrivilegesPointer -Process {} } | Should -Throw $expected
+        }
     }
 }

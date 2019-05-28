@@ -2,6 +2,42 @@
 # MIT License (see LICENSE or https://opensource.org/licenses/MIT)
 
 Function Test-TokenMembership {
+    <#
+    .SYNOPSIS
+    Tests the membership of an access token.
+
+    .DESCRIPTION
+    Tests whether a SID is an enabled member of an access token's groups. This is performed by the Win32 function
+    CheckTokenMembership().
+
+    .PARAMETER Token
+    An explicit token to use when running the scriptblock, falls back to the current thread/process if omitted.
+
+    .PARAMETER ProcessId
+    Opens the access token for the process specified, falls back to the current thread/process if omitted.
+
+    .PARAMETER ThreadId
+    Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
+
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
+    .PARAMETER Sid
+    The SecurityIdentifier to check the membership of. This must be part of the TokenGroups with the Enabled attribute
+    set.
+
+    .PARAMETER IncludeAppContainers
+    Runs the check with the flag 'CTMF_INCLUDE_APPCONTAINER' which allows app containers to pass the call.
+
+    .OUTPUTS
+    [System.Boolean] Whether the SID is an Enabled member of the token's groups.
+
+    .EXAMPLE Check if the Administrators token is a member
+    Test-TokenMembership -Sid 'Administrators'
+
+    .EXAMPLE Check if the Users token is a member of a specific process
+    Test-TokenMembership -ProcessId 1234 -Sid 'Users'
+    #>
     [OutputType([System.Boolean])]
     [CmdletBinding(DefaultParameterSetName="Token")]
     Param (
@@ -16,6 +52,10 @@ Function Test-TokenMembership {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(Mandatory=$true)]
         [System.Object]

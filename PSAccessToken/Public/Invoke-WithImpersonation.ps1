@@ -16,9 +16,6 @@ Function Invoke-WithImpersonation {
     Specifies the commands to run. Enclose the commands in braces ( { } ) to create a script block. This parameter is
     required.
 
-    .PARAMETER NoNewScope
-    Parameter description
-
     .PARAMETER InputObject
     Specifies input to the command. Enter a variable that contains the objects or type a command or expression that
     gets the objects.
@@ -44,10 +41,6 @@ Function Invoke-WithImpersonation {
     token.
     #>
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        "PSUseOutputTypeCorrectly", "",
-        Justification="Invoke-Command returns anything but PSSA seems to think it's just a boolean."
-    )]
     Param (
         [Parameter(Mandatory=$true, Position=0)]
         [PInvokeHelper.SafeNativeHandle]
@@ -56,9 +49,6 @@ Function Invoke-WithImpersonation {
         [Parameter(Mandatory=$true, Position=1)]
         [ScriptBlock]
         $ScriptBlock,
-
-        [Switch]
-        $NoNewScope,
 
         [PSObject]
         $InputObject,
@@ -81,6 +71,6 @@ Function Invoke-WithImpersonation {
         $PSBoundParameters.Remove('Token') > $null
         Invoke-Command @PSBoundParameters
     } finally {
-        [PSAccessToken.NativeMethods]::RevertToSelf() > $null
+        [Void][PSAccessToken.NativeMethods]::RevertToSelf()
     }
 }

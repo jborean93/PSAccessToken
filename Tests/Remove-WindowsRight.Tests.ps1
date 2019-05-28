@@ -10,32 +10,16 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
+. $PSScriptRoot\..\$module_name\Private\$cmdlet_name.ps1
+. $PSScriptRoot\..\$module_name\Private\Get-Win32ErrorFromLsaStatus.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the virtualization allowed for current process' {
-            $actual = Get-TokenVirtualizationAllowed
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the virtualization allowed based on a PID' {
-            $actual = Get-TokenVirtualizationAllowed -ProcessId $PID
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the virtualization allowed based on an explicit token' {
-            $h_token = Open-ProcessToken
-            try {
-                $actual = Get-TokenVirtualizationAllowed -Token $h_token
-            } finally {
-                $h_token.Dispose()
-            }
-
-            $actual | Should -Be $false
+        It 'Should fail with invalid handle' {
+            $expected = 'Failed to remove account rights: The handle is invalid (Win32 ErrorCode 6 - 0x00000006)'
+            { Remove-WindowsRight -LsaHandle ([System.IntPtr]::Zero) -SidBytes @(0) } | Should -Throw $expected
         }
     }
 }

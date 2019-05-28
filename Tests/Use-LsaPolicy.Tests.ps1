@@ -10,32 +10,26 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
+. $PSScriptRoot\..\$module_name\Private\$cmdlet_name.ps1
+. $PSScriptRoot\..\$module_name\Private\Get-Win32ErrorFromLsaStatus.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'Gets the virtualization allowed for current process' {
-            $actual = Get-TokenVirtualizationAllowed
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the virtualization allowed based on a PID' {
-            $actual = Get-TokenVirtualizationAllowed -ProcessId $PID
-
-            $actual | Should -Be $false
-        }
-
-        It 'Gets the virtualization allowed based on an explicit token' {
-            $h_token = Open-ProcessToken
-            try {
-                $actual = Get-TokenVirtualizationAllowed -Token $h_token
-            } finally {
-                $h_token.Dispose()
+        It 'Should fail to logon on' {
+            $user = Get-TokenUser
+            $token = Invoke-WithPrivilege -Privilege SeCreateTokenPrivilege -ScriptBlock {
+                New-AccessToken -User $user -Groups @() -Privileges @()
             }
-
-            $actual | Should -Be $false
+            try {
+                $expected = 'Failed to open LSA Policy handle: Access is denied (Win32 ErrorCode 5 - 0x00000005)'
+                Invoke-WithImpersonation -Token $token -ScriptBlock {
+                    { Use-LsaPolicy -Access 0 -Process {} } | Should -Throw $expected
+                }
+            } finally {
+                $token.Dispose()
+            }
         }
     }
 }

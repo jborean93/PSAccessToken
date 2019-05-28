@@ -18,6 +18,9 @@ Function Get-TokenLogonSid {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [PSAccessToken.TokenLogonSid]
         Account - The human name of the Sid.
@@ -59,7 +62,11 @@ Function Get-TokenLogonSid {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
     Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::LogonSid) -Process {

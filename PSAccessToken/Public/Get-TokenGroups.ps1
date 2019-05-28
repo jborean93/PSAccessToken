@@ -19,6 +19,9 @@ Function Get-TokenGroups {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [PSAccessToken.SidAndAttributes]
         Account - The NTAccount representation of the Sid.
@@ -61,7 +64,11 @@ Function Get-TokenGroups {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
     Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::Groups) -Process {

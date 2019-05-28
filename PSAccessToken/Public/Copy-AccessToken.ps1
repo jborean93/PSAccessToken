@@ -19,6 +19,9 @@ Function Copy-AccessToken {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER Access
     The TokenAccessLevels that specifies the access rights of the copied access token. Set to 0 (default) to just use
     the existing rights of the current access token.
@@ -74,6 +77,10 @@ Function Copy-AccessToken {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [System.Security.Principal.TokenAccessLevels]
         $Access = [System.Security.Principal.TokenAccessLevels]0,  # Same as the existing token

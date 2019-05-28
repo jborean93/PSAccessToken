@@ -19,6 +19,9 @@ Function Set-TokenPrivileges {
     .PARAMETER ThreadId
     Uses the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER Name
     The name of the privilege to set.
 
@@ -100,6 +103,10 @@ Function Set-TokenPrivileges {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
         [Alias('Privilege')]

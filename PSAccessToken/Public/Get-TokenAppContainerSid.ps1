@@ -19,6 +19,9 @@ Function Get-TokenAppContainerSid {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [System.Security.Principal.SecurityIdentifier] The AppContainer SID associated with the access token.
 
@@ -54,7 +57,11 @@ Function Get-TokenAppContainerSid {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
     Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::AppContainerSid) -Process {

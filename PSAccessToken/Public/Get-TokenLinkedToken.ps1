@@ -19,6 +19,9 @@ Function Get-TokenLinkedToken {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [PInvokeHelper.SafeNativeHandle] The handle to the linked access token. The .Dispose() method should be called
     when this is no longer needed.
@@ -29,17 +32,14 @@ Function Get-TokenLinkedToken {
     .EXAMPLE Gets the linked token for the process with the id 1234
     Get-TokenLinkedToken -ProcessId 1234
 
-    .EXAMPLE Gets the linked token for an existing token handle
-    $h_process = Get-ProcessHandle -ProcessId 1234
+    .EXAMPLE Gets the primary linked token for the current process
+    $h_token = Invoke-WithPrivilege -Privilege SeTcbPrivilege -ScriptBlock {
+        Get-TokenLinkedToken -UseProcessToken  # SwitchFlag means it uses the process access token, not the impersonated token
+    }
     try {
-        $h_token = Open-ProcessToken -Process $h_process -Access QuerySource
-        try {
-            Get-TokenLinkedToken -Token $h_token
-        } finally {
-            $h_token.Dispose()
-        }
+        Get-TokenType -Token $h_token
     } finally {
-        $h_process.Dispose()
+        $h_token.Dispose()
     }
 
     .NOTES
@@ -59,15 +59,25 @@ Function Get-TokenLinkedToken {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
-    Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::LinkedToken) -Process {
-        Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
+    # Try and enable the SeTcbPrivilege privilege beforehand, do not fail if it cannot be set.
+    $old_state = Set-TokenPrivileges -Name SeTcbPrivilege
+    try {
+        Get-TokenInformation @PSBoundParameters -TokenInfoClass ([PSAccessToken.TokenInformationClass]::LinkedToken) -Process {
+            Param ([System.IntPtr]$TokenInfo, [System.UInt32]$TokenInfoLength)
 
-        $token_linked_token = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
-            $TokenInfo, [Type][PSAccessToken.TOKEN_LINKED_TOKEN]
-        )
-        New-Object -TypeName PInvokeHelper.SafeNativeHandle -ArgumentList $token_linked_token.LinkedToken
+            $token_linked_token = [System.Runtime.InteropServices.Marshal]::PtrToStructure(
+                $TokenInfo, [Type][PSAccessToken.TOKEN_LINKED_TOKEN]
+            )
+            New-Object -TypeName PInvokeHelper.SafeNativeHandle -ArgumentList $token_linked_token.LinkedToken
+        }
+    } finally {
+        $old_state | Set-TokenPrivileges > $null
     }
 }

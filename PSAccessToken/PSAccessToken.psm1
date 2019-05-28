@@ -35,6 +35,29 @@ $module_builder = New-DynamicModule -Name PSAccessToken
         }
     },
     @{
+        Name = 'PSAccessToken.LsaAccessMask'
+        Type = ([System.UInt32])
+        Flags = $true
+        Values = @{
+            ViewLocalInformation = 0x00000001
+            ViewAuditInformation = 0x00000002
+            GetPrivateInformation = 0x00000004
+            TrustAdmin = 0x00000008
+            CreateAccount = 0x00000010
+            CreateSecret = 0x00000020
+            CreatePrivilege = 0x00000040
+            SetDefaultQuotaLimits = 0x00000080
+            SetAuditRequirements = 0x00000100
+            AuditLogAdmin = 0x00000200
+            ServerAdmin = 0x00000400
+            LookupNames = 0x00000800
+            Read = 0x00020006
+            Write = 0x000207F8
+            Execute = 0x00020801
+            AllAccess = 0x000F0FFF
+        }
+    },
+    @{
         Name = 'PSAccessToken.ProfileUserFlags'
         Type = ([System.UInt32])
         Flags = $true
@@ -225,7 +248,7 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             Capabilities = 30
             AppContainerSid = 31
             AppContainerNumber = 32
-            # TODO: Get
+            # TODO: Get cmdlets
             UserClaimAttributes = 33
             DeviceClaimAttributes = 34
             RestrictedUserClaimAttributes = 35
@@ -233,7 +256,7 @@ $module_builder = New-DynamicModule -Name PSAccessToken
             DeviceGroups = 37
             RestrictedDeviceGroups = 38
             SecurityAttributes = 39
-            # TODO: End Get
+            # TODO: End Get cmdlets
             IsRestricted = 40
             ProcessTrustLevel = 41
             PrivateNameSpace = 42
@@ -1366,6 +1389,27 @@ $type_builder = $module_builder.DefineType(
         CharSet = [System.Runtime.InteropServices.CharSet]::Unicode
     },
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaaddaccountrights
+        DllName = 'Advapi32.dll'
+        Name = 'LsaAddAccountRights'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [System.Byte[]],
+            [PSAccessToken.LSA_UNICODE_STRING[]],
+            [System.UInt32]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaclose
+        DllName = 'Advapi32.dll'
+        Name = 'LsaClose'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr]
+        )
+    },
+    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaconnectuntrusted
         DllName = 'Secur32.dll'
         Name = 'LsaConnectUntrusted'
@@ -1403,26 +1447,6 @@ $type_builder = $module_builder.DefineType(
         )
     },
     @{
-        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsalookupauthenticationpackage
-        DllName = 'Secur32.dll'
-        Name = 'LsaLookupAuthenticationPackage'
-        ReturnType = ([System.UInt32])
-        ParameterTypes = @(
-            [System.IntPtr],
-            [PSAccessToken.LSA_STRING],
-            @{ Ref = $true; Type = [System.UInt32] }
-        )
-    },
-    @{
-        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsantstatustowinerror
-        DllName = 'Advapi32.dll'
-        Name = 'LsaNtStatusToWinError'
-        ReturnType = ([System.Int32])
-        ParameterTypes = @(
-            [System.UInt32]
-        )
-    },
-    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsalogonuser
         DllName = 'Secur32.dll'
         Name = 'LsaLogonUser'
@@ -1446,6 +1470,38 @@ $type_builder = $module_builder.DefineType(
         SetLastError = $true
     },
     @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsalookupauthenticationpackage
+        DllName = 'Secur32.dll'
+        Name = 'LsaLookupAuthenticationPackage'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [PSAccessToken.LSA_STRING],
+            @{ Ref = $true; Type = [System.UInt32] }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsantstatustowinerror
+        DllName = 'Advapi32.dll'
+        Name = 'LsaNtStatusToWinError'
+        ReturnType = ([System.Int32])
+        ParameterTypes = @(
+            [System.UInt32]
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaopenpolicy
+        DllName = 'Advapi32.dll'
+        Name = 'LsaOpenPolicy'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [PSAccessToken.OBJECT_ATTRIBUTES],
+            [PSAccessToken.LsaAccessMask],
+            @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
         # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaregisterlogonprocess
         DllName = 'Secur32.dll'
         Name = 'LsaRegisterLogonProcess'
@@ -1454,6 +1510,24 @@ $type_builder = $module_builder.DefineType(
             [PSAccessToken.LSA_STRING],
             @{ Ref = $true; Type = [System.IntPtr] },
             @{ Ref = $true; Type = [System.IntPtr] }
+        )
+    },
+    @{
+        # https://docs.microsoft.com/en-us/windows/desktop/api/ntsecapi/nf-ntsecapi-lsaremoveaccountrights
+        DllName = 'Advapi32.dll'
+        Name = 'LsaRemoveAccountRights'
+        ReturnType = ([System.UInt32])
+        ParameterTypes = @(
+            [System.IntPtr],
+            [System.Byte[]],
+            @{
+                Type = [System.Boolean]
+                MarshalAs = @{
+                    Type = [System.Runtime.InteropServices.UnmanagedType]::U1
+                }
+            },
+            [PSAccessToken.LSA_UNICODE_STRING[]],
+            [System.UInt32]
         )
     },
     @{

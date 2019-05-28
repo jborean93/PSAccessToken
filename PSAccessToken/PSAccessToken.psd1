@@ -54,6 +54,7 @@
         'Get-TokenVirtualizationEnabled',
         'Invoke-LogonUser',
         'Invoke-WithImpersonation',
+        'Invoke-WithPrivilege',
         'New-AccessToken',
         'New-LowBoxToken',
         'New-RestrictedToken',

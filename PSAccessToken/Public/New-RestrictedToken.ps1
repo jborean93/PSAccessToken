@@ -18,6 +18,9 @@ Function New-RestrictedToken {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER RemovedSids
     A list of SIDs or accounts to disable from the token. These SIDs are set as a deny only SID and are used to
     validate deny only DACL access.
@@ -75,6 +78,10 @@ Function New-RestrictedToken {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Object[]]
         $DisabledSids = @(),

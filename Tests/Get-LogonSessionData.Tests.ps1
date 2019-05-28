@@ -10,7 +10,6 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
-. $PSScriptRoot\TestUtils.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
@@ -91,6 +90,8 @@ Describe "$cmdlet_name PS$ps_version tests" {
                 $LogonId
             )
 
+            . $PSSCriptRoot\TestUtils.ps1
+
             $expected_id = New-Object -TypeName PSAccessToken.LUID
             $expected_id.LowPart = $LogonId
 
@@ -117,26 +118,21 @@ Describe "$cmdlet_name PS$ps_version tests" {
         }
 
         It 'Gets a logon session for own own created token' {
-            $elevated_token = Get-TokenWithPrivilege -Privileges 'SeCreateTokenPrivilege'
-            try {
-                Invoke-WithImpersonation -Token $elevated_token -ScriptBlock {
-                    # The logons ession data for the new token should be the same as the impersonated token as we set
-                    # the LogonId/AuthenticationId to the current user's one.
-                    $token_user = Get-TokenUser
-                    $token_statistics = Get-TokenStatistics
+            Invoke-WithPrivilege -Privilege SeCreateTokenPrivilege -ScriptBlock {
+                # The logons ession data for the new token should be the same as the impersonated token as we set
+                # the LogonId/AuthenticationId to the current user's one.
+                $token_user = Get-TokenUser
+                $token_statistics = Get-TokenStatistics
 
-                    $current_user = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
-                    $h_token = New-AccessToken $current_user -Groups @() -Privileges @()
-                    try {
-                        $actual = Get-LogonSessionData -Token $h_token
-                        $actual.Sid | Should -Be $token_user.Translate([System.Security.Principal.SecurityIdentifier])
-                        $actual.LogonId | Should -Be $token_statistics.AuthenticationId
-                    } finally {
-                        $h_token.Dispose()
-                    }
+                $current_user = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+                $h_token = New-AccessToken $current_user -Groups @() -Privileges @()
+                try {
+                    $actual = Get-LogonSessionData -Token $h_token
+                    $actual.Sid | Should -Be $token_user.Translate([System.Security.Principal.SecurityIdentifier])
+                    $actual.LogonId | Should -Be $token_statistics.AuthenticationId
+                } finally {
+                    $h_token.Dispose()
                 }
-            } finally {
-                $elevated_token.Dispose()
             }
         }
     }

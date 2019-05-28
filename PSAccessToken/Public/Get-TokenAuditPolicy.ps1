@@ -19,6 +19,9 @@ Function Get-TokenAuditPolicy {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     A byte[] of the audit policy info. This can change to a proper structure once this is understood more.
 
@@ -59,7 +62,11 @@ Function Get-TokenAuditPolicy {
 
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
-        $ThreadId
+        $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken
     )
 
     $old_state = Set-TokenPrivileges -Name SeSecurityPrivilege -Strict

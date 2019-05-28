@@ -20,6 +20,9 @@ Function Get-TokenInformation {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .PARAMETER TokenInfoClass
     The class of information to retrieve.
 
@@ -53,6 +56,10 @@ Function Get-TokenInformation {
         [Parameter(ParameterSetName="TID")]
         [System.UInt32]
         $ThreadId,
+
+        [Parameter(ParameterSetName="ProcessToken")]
+        [Switch]
+        $UseProcessToken,
 
         [Parameter(Mandatory=$true)]
         [PSAccessToken.TokenInformationClass]

@@ -20,6 +20,9 @@ Function Get-TokenVirtualizationEnabled {
     .PARAMETER ThreadId
     Opens the thread token for the thread specified, falls back to the current thread/process if omitted.
 
+    .PARAMETER UseProcessToken
+    Use the primary process token even if the thread is impersonating another account.
+
     .OUTPUTS
     [System.Boolean] Whether virtualization is enabled for the token.
 
