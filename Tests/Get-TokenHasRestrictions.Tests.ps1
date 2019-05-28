@@ -10,7 +10,6 @@ $ps_version = $PSVersionTable.PSVersion.Major
 $cmdlet_name = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 $module_name = (Get-ChildItem -Path $PSScriptRoot\.. -Directory -Exclude @("Build", "Docs", "Tests")).Name
 Import-Module -Name $PSScriptRoot\..\$module_name -Force
-. $PSScriptRoot\TestUtils.ps1
 
 Describe "$cmdlet_name PS$ps_version tests" {
     Context 'Strict mode' {
@@ -37,18 +36,6 @@ Describe "$cmdlet_name PS$ps_version tests" {
             }
 
             $actual | Should -Be $false
-        }
-
-        It 'Gets the has restrictions status for a default token' {
-            $system_token = Get-SystemToken
-            try {
-                Invoke-WithImpersonation -Token $system_token -ScriptBlock {
-                    $actual = Get-TokenHasRestrictions
-                    $actual | Should -Be $true
-                }
-            } finally {
-                $system_token.Dispose()
-            }
         }
 
         It 'Gets the has restrictions status for a limited token' {
