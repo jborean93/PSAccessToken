@@ -40,7 +40,7 @@ Describe "$cmdlet_name PS$ps_version tests" {
         }
 
         It 'Get IsRestricted with a restricted token' {
-            $restricted_token = New-RestrictedToken -RestrictedSids 'Administrator'
+            $restricted_token = New-RestrictedToken -RestrictedSids 'S-1-5-32-544'
             try {
                 $actual = Get-TokenIsRestricted -Token $restricted_token
 
