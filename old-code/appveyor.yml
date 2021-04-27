@@ -1,0 +1,86 @@
+# Publish to PowerShell Gallery with this key
+environment:
+  APPVEYOR_RDP_PASSWORD: Fj00!mx9Wesu9Mu#
+  NuGetApiKey:
+    secure: VMvVbhuMaUTbI8WgnJH/WF7UBGwj261AgERGm25s21zQErHoIdwacoF3yd6OjIWh
+
+image: Visual Studio 2019
+
+# specify the cloned folder in upper case so the PSGallery upload is in this format
+clone_folder: c:\projects\PSAccessToken
+
+# Skip on updates to the readme.
+skip_commits:
+  files:
+  - README.md
+  - CHANGELOG.md
+
+# Seems like the reboot only works if I enabled RDP
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# We need to ensure UAC is enabled and the builtin Admin account has a filtered token so the full test suite is run.
+install:
+- ps: |
+    $ErrorActionPreference = 'Stop'
+
+    Function Restart-AppVeyor {
+        $current_user_run = Get-Item -LiteralPath "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+        try {
+            $current_user_run.Property | Where-Object { $_.StartsWith("AppVeyor") } | ForEach-Object -Process {
+                $value = (Get-ItemProperty -LiteralPath $current_user_run.PSPath -Name $_).$_
+
+                $system_user_run = Get-Item -LiteralPath "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"
+                try {
+                    $system_run_value = $system_user_run.GetValue($_, $null)
+                    if ($null -ne $system_run_value) {
+                        Remove-ItemProperty -LiteralPath $system_user_run.PSPath -Name $_ -Force
+                    }
+                    New-ItemProperty -LiteralPath $system_user_run.PSPath -Name $_ -Value $value -PropertyType String > $null
+                } finally {
+                    $system_user_run.Dispose()
+                }
+
+                Remove-ItemProperty -LiteralPath $current_user_run.PSPath -Name $_ -Force
+            }
+        } finally {
+            $current_user_run.Dispose()
+        }
+
+        Restart-Computer -Force
+        Start-Sleep -Seconds 10
+    }
+
+    $reg_path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+    $reg_key = Get-Item -LiteralPath $reg_path
+    $changed = $false
+
+    try {
+        'FilterAdministratorToken', 'EnableLUA' | ForEach-Object -Process {
+            Write-Output -InputObject "Checking UAC registry property '$_'"
+            $reg_value = $reg_key.GetValue($_, $null)
+            if ($reg_value -ne 1) {
+                if ($null -ne $reg_value) {
+                    Write-Output -InputObject "UAC registry prop '$_' not equal to 1, deleting"
+                    Remove-ItemProperty -LiteralPath $reg_path -Name $_
+                }
+
+                Write-Output -InputObject "Creating UAC registry prop '$_' with a DWord value of 1"
+                New-ItemProperty -LiteralPath $reg_path -Name $_ -Value 1 -PropertyType DWord > $null
+                $changed = $true
+
+            }
+        }
+    } finally {
+        $reg_key.Dispose()
+    }
+
+    if ($changed) {
+        Write-Output -InputObject "Rebooting node after applying UAC changed"
+        Restart-AppVeyor
+    }
+
+build: false
+
+test_script:
+- ps: . .\build.ps1

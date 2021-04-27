@@ -1,90 +1,66 @@
-# thanks to http://ramblingcookiemonster.github.io/Building-A-PowerShell-Module/
+[CmdletBinding()]
+param(
+    [Parameter()]
+    [ValidateSet('Debug', 'Release')]
+    [string]
+    $Configuration = 'Debug',
 
-Function Resolve-Module {
-    [Cmdletbinding()]
-    Param (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-        [String]
-        $Name,
+    [Parameter()]
+    [string]
+    $Task = 'Build'
+)
 
-        [Parameter(ValueFromPipelineByPropertyName=$true)]
-        [Version]
-        $Version
-    )
-
-    Begin {
-        $input_modules = @{}
+end {
+    if ($PSEdition -eq 'Desktop') {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 'Tls12'
     }
 
-    Process {
-        $input_modules.Add($Name, $Version)
-    }
+    $modulePath = [IO.Path]::Combine($PSScriptRoot, 'tools', 'Modules')
+    $requirements = Import-PowerShellDataFile ([IO.Path]::Combine($PSScriptRoot, 'requirements.psd1'))
+    foreach ($req in $requirements.GetEnumerator()) {
+        $targetPath = [IO.Path]::Combine($modulePath, $req.Key)
 
-    End {
-        $modules = [System.String[]]$input_modules.Keys
-        $versions = Find-Module -Name $modules -Repository PSGallery
-
-        foreach ($module_name in $modules) {
-            $module_version = $input_modules.$module_name
-            $module = Get-Module -Name $module_name -ListAvailable
-            Write-Verbose -Message "Resolving module $module_name"
-
-            if ($module) {
-                if ($null -eq $module_version) {
-                    Write-Verbose -Message "Module $module_name is present, checking if version is the latest available"
-                    $module_version = ($versions | Where-Object { $_.Name -eq $module_name } | `
-                        Measure-Object -Property Version -Maximum).Maximum
-                    $installed_version = ($module | Measure-Object -Property Version -Maximum).Maximum
-
-                    $install = $installed_version -lt $module_version
-                } else {
-                    Write-Verbose -Message "Module $module_name is present, checking if version matched $module_version"
-                    $version_installed = $module | Where-Object { $_.Version -eq $module_version }
-                    $install = $null -eq $version_installed
-                }
-
-                if ($install) {
-                    Write-Verbose -Message "Installing module $module_name at version $module_version"
-                    Install-Module -Name $module_name -Force -SkipPublisherCheck -RequiredVersion $module_version
-                }
-                Import-Module -Name $module_name -RequiredVersion $module_version
-            } else {
-                Write-Verbose -Message "Module $module_name is not installed, installing"
-                $splat_args = @{}
-                if ($null -ne $module_version) {
-                    $splat_args.RequiredVersion = $module_version
-                }
-                Install-Module -Name $module_name -Force -SkipPublisherCheck @splat_args
-                Import-Module -Name $module_name -Force
-            }
+        if (Test-Path -LiteralPath $targetPath) {
+            Import-Module -Name $targetPath -Force -ErrorAction Stop
+            continue
         }
+
+        Write-Host "Installing build pre-req $($req.Key) as it is not installed"
+        New-Item -Path $targetPath -ItemType Directory | Out-Null
+
+        $webParams = @{
+            Uri = "https://www.powershellgallery.com/api/v2/package/$($req.Key)/$($req.Value)"
+            OutFile = [IO.Path]::Combine($modulePath, "$($req.Key).zip")  # WinPS requires the .zip extension to extract
+            UseBasicParsing = $true
+        }
+        if ('Authentication' -in (Get-Command -Name Invoke-WebRequest).Parameters.Keys) {
+            $webParams.Authentication = 'None'
+        }
+
+        $oldProgress = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
+        try {
+            Invoke-WebRequest @webParams
+            Expand-Archive -Path $webParams.OutFile -DestinationPath $targetPath -Force
+            Remove-Item -LiteralPath $webParams.OutFile -Force
+        }
+        finally {
+            $ProgressPreference = $oldProgress
+        }
+
+        Import-Module -Name $targetPath -Force -ErrorAction Stop
     }
+
+    $dotnetTools = @(dotnet tool list --global) -join "`n"
+    if (-not $dotnetTools.Contains('coverlet.console')) {
+        Write-Host 'Installing dotnet tool coverlet.console'
+        dotnet tool install --global coverlet.console
+    }
+
+    $invokeBuildSplat = @{
+        Task = $Task
+        File = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '*.build.ps1'))).FullName
+        Configuration = $Configuration
+    }
+    Invoke-Build @invokeBuildSplat
 }
-
-Get-PackageProvider -Name NuGet -ForceBootstrap > $null
-if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne "Trusted") {
-    Write-Verbose -Message "Setting PSGallery as a trusted repository"
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-}
-
-@(
-    'Psake',
-    'PSDeploy',
-    'Pester',
-    'BuildHelpers',
-    'PSScriptAnalyzer',
-    'PInvokeHelper'
-) | Resolve-Module
-
-Set-BuildEnvironment -ErrorAction SilentlyContinue
-
-# Bug in PSGet (or something it uses internally) means that the current thread is impersonating a token. This causes
-# issues with the tests which expect it to be run from a primary token without any impersonation set. This task will
-# revert the impersonation to ensure the tests run.
-$win32 = Add-Type -Namespace 'BuildWin32' -Name 'NativeMethods' -PassThru -MemberDefinition @'
-[DllImport("Advapi32.dll")]public static extern bool RevertToSelf();
-'@
-$win32::RevertToSelf() > $null
-
-Invoke-psake .\psake.ps1
-exit ( [int]( -not $psake.build_success ) )
