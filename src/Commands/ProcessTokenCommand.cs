@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
@@ -5,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace PSAccessToken
 {
     [Cmdlet(
-        VerbsCommon.Open, "ProcessToken"
+        VerbsCommon.Get, "ProcessToken"
     )]
     [OutputType(typeof(SafeHandle))]
     public class OpenProcessTokenCommand : PSCmdlet
@@ -38,7 +39,8 @@ namespace PSAccessToken
                 }
                 catch (Win32Exception e)
                 {
-                    WriteError(new ErrorRecord(e, "errorId", ErrorCategory.NotSpecified, null));
+                    WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process token",
+                        "OpenProcessToken", (Int64)handle.DangerousGetHandle()));
                 }
             }
         }

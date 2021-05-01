@@ -54,8 +54,6 @@ namespace PSAccessToken
         private bool _isValid = false;
 
         public SafeNativeHandle() : base(true) { }
-        public SafeNativeHandle(IntPtr handle) : this(handle, true) { }
-        public SafeNativeHandle(IntPtr handle, bool ownsHandle) : this(handle, ownsHandle, false) { }
         public SafeNativeHandle(IntPtr handle, bool ownsHandle, bool isValid) : base(ownsHandle)
         {
             base.SetHandle(handle);

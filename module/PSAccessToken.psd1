@@ -71,8 +71,8 @@ FunctionsToExport = @()
 CmdletsToExport = @(
     'Get-HandleInformation'
     'Get-ProcessHandle'
+    'Get-ProcessToken'
     'Get-ThreadHandle'
-    'Open-ProcessToken'
     'Set-HandleInformation'
 )
 
