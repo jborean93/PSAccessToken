@@ -8,6 +8,7 @@ namespace PSAccessToken
     {
         ERROR_SUCCESS = 0x00000000,
         ERROR_ACCESS_DENIED = 0x00000005,
+        ERROR_INVALID_HANDLE = 0x00000006,
         ERROR_INVALID_PARAMETER = 0x00000057,
     }
 
@@ -31,6 +32,10 @@ namespace PSAccessToken
             {
                 case (int)Win32ErrorCode.ERROR_ACCESS_DENIED:
                     category = ErrorCategory.PermissionDenied;
+                    break;
+
+                case (int)Win32ErrorCode.ERROR_INVALID_HANDLE:
+                    category = ErrorCategory.InvalidData;
                     break;
 
                 case (int)Win32ErrorCode.ERROR_INVALID_PARAMETER:
