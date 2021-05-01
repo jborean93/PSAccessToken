@@ -202,6 +202,17 @@ task DoTest {
             )
 
             try {
+                [PSCustomObject]$PSVersionTable |
+                    Select-Object -Property *, @{N='Architecture';E={
+                        switch ([IntPtr]::Size) {
+                            4 { 'x86' }
+                            8 { 'x64' }
+                            default { 'Unknown' }
+                        }
+                    }} |
+                    Format-List |
+                    Out-Host
+
                 Import-Module -Name $PesterPath -Force
 
                 $configuration = [PesterConfiguration]::Default

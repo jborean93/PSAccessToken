@@ -1,5 +1,6 @@
 # PSAccessToken
 
+[![Test workflow](https://github.com/jborean93/PSAccessToken/workflows/Test%20PSAccessToken/badge.svg)](https://github.com/jborean93/PSAccessToken/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/jborean93/PSAccessToken/branch/main/graph/badge.svg?token=b51IOhpLfQ)](https://codecov.io/gh/jborean93/PSAccessToken)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/PSAccessToken.svg)](https://www.powershellgallery.com/packages/PSAccessToken)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jborean93/PSAccessToken/blob/main/LICENSE)
