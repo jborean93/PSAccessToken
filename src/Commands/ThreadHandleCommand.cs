@@ -52,7 +52,8 @@ namespace PSAccessToken
                     }
                     catch (Win32Exception e)
                     {
-                        WriteError(new ErrorRecord(e, "errorId", ErrorCategory.NotSpecified, null));
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread handle",
+                            "OpenThread", tid));
                     }
                 }
             }
