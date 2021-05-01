@@ -5,28 +5,28 @@ online version:
 schema: 2.0.0
 ---
 
-# Open-ProcessToken
+# Get-ProcessToken
 
 ## SYNOPSIS
-Opens the access token associated with a process.
+Gets the access token associated with a process.
 
 ## SYNTAX
 
 ```
-Open-ProcessToken [[-Process] <SafeHandle[]>] [[-Access] <TokenAccessRights>] [<CommonParameters>]
+Get-ProcessToken [[-Process] <SafeHandle[]>] [[-Access] <TokenAccessRights>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Opens the access token for the current or specific process.
+Gets the access token for the current or specific process.
 
 ## EXAMPLES
 
-### Open access token for the current process
+### Get access token for the current process
 ```powershell
-PS C:\> $token = Open-ProcessToken
+PS C:\> $token = Get-ProcessToken
 ```
 
-Opens the token for the current process with Query rights.
+Get the token for the current process with Query rights.
 
 ## PARAMETERS
 
@@ -48,8 +48,8 @@ Accept wildcard characters: False
 ```
 
 ### -Process
-The process handle, or list of handles, to open the access token for.
-Use Get-ProcessHandle to open a process handle for another process.
+The process handle, or list of handles, to get the access token for.
+Use Get-ProcessHandle to get a process handle for another process.
 When omitted the access token for the current process is used.
 
 ```yaml

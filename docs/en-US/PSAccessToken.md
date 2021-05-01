@@ -17,11 +17,11 @@ Get information on a Windows handle.
 ### [Get-ProcessHandle](Get-ProcessHandle.md)
 Get a handle to the current process or the process specified.
 
+### [Get-ProcessToken](Get-ProcessToken.md)
+Gets the access token associated with a process.
+
 ### [Get-ThreadHandle](Get-ThreadHandle.md)
 Get a handle to the current thread of the thread specified.
-
-### [Open-ProcessToken](Open-ProcessToken.md)
-Opens the access token associated with a process.
 
 ### [Set-HandleInformation](Set-HandleInformation.md)
 Sets certain property of a Windows handle.
