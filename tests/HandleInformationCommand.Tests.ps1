@@ -17,6 +17,15 @@ Describe "Get-HandleInformation" {
 
         $actual.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
     }
+
+    It "Fails with invalid handle" {
+        $handle = [Microsoft.Win32.SafeHandles.SafeWaitHandle]::new([IntPtr]::Zero, $false)
+        $out = Get-HandleInformation -Handle $handle -ErrorVariable err -ErrorAction SilentlyContinue
+
+        $out | Should -Be $null
+        $err.Count | Should -Be 1
+        $err[0] | Should -BeLike 'Failed to get handle information*The handle is invalid*'
+    }
 }
 
 Describe "Set-HandleInformation" {
@@ -62,5 +71,14 @@ Describe "Set-HandleInformation" {
 
         $actual = $handle | Get-HandleInformation
         $actual.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $false
+    }
+
+    It "Fails with invalid handle" {
+        $handle = [Microsoft.Win32.SafeHandles.SafeWaitHandle]::new([IntPtr]::Zero, $false)
+        $out = Set-HandleInformation -Handle $handle -Clear -ErrorVariable err -ErrorAction SilentlyContinue
+
+        $out | Should -Be $null
+        $err.Count | Should -Be 1
+        $err[0] | Should -BeLike 'Failed to set handle information*The handle is invalid*'
     }
 }
