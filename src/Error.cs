@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Management.Automation;
+using System.Runtime.InteropServices;
 
 namespace PSAccessToken
 {
@@ -9,15 +10,29 @@ namespace PSAccessToken
         ERROR_SUCCESS = 0x00000000,
         ERROR_ACCESS_DENIED = 0x00000005,
         ERROR_INVALID_HANDLE = 0x00000006,
+        ERROR_BAD_LENGTH = 0x00000018,
         ERROR_INVALID_PARAMETER = 0x00000057,
+        ERROR_INSUFFICIENT_BUFFER = 0x0000007A,
+        ERROR_NO_TOKEN = 0x000003F0,
+    }
+
+    public class NativeException : Win32Exception
+    {
+        public string Function { get; }
+
+        public NativeException(string function) : this(function, Marshal.GetLastWin32Error()) { }
+        public NativeException(string function, int errorCode) : base(errorCode)
+        {
+            Function = function;
+        }
     }
 
     internal class ErrorHelper
     {
-        public static ErrorRecord GenerateWin32Error(Win32Exception exception, string message, string nativeFunction,
+        public static ErrorRecord GenerateWin32Error(NativeException exception, string message,
             object targetObject = null)
         {
-            string errorId = nativeFunction + ",";
+            string errorId = exception.Function + ",";
             try
             {
                 errorId += Enum.GetName(typeof(Win32ErrorCode), exception.NativeErrorCode);
@@ -38,8 +53,14 @@ namespace PSAccessToken
                     category = ErrorCategory.InvalidData;
                     break;
 
+                case (int)Win32ErrorCode.ERROR_BAD_LENGTH:
+                case (int)Win32ErrorCode.ERROR_INSUFFICIENT_BUFFER:
                 case (int)Win32ErrorCode.ERROR_INVALID_PARAMETER:
                     category = ErrorCategory.InvalidArgument;
+                    break;
+
+                case (int)Win32ErrorCode.ERROR_NO_TOKEN:
+                    category = ErrorCategory.ObjectNotFound;
                     break;
             }
 

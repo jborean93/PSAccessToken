@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 
@@ -27,10 +26,10 @@ namespace PSAccessToken
                 {
                     WriteObject(NativeMethods.GetHandleInformation(h));
                 }
-                catch (Win32Exception e)
+                catch (NativeException e)
                 {
                     WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get handle information",
-                        "GetHandleInformation", (Int64)h.DangerousGetHandle()));
+                        (Int64)h.DangerousGetHandle()));
                 }
             }
         }
@@ -92,10 +91,10 @@ namespace PSAccessToken
                         NativeMethods.SetHandleInformation(h, _mask, _flags);
                     }
                 }
-                catch (Win32Exception e)
+                catch (NativeException e)
                 {
                     WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to set handle information",
-                        "SetHandleInformation", (Int64)h.DangerousGetHandle()));
+                        (Int64)h.DangerousGetHandle()));
                 }
             }
         }

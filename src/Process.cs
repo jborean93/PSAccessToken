@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
@@ -16,6 +15,9 @@ namespace PSAccessToken
             return new SafeNativeHandle(NativeGetCurrentProcess(), false, true);
         }
 
+        [DllImport("Kernel32.dll")]
+        public static extern Int32 GetCurrentProcessId();
+
         [DllImport("Kernel32.dll", EntryPoint = "OpenProcess", SetLastError = true)]
         private static extern SafeNativeHandle NativeOpenProcess(
             ProcessAccessRights dwDesiredAccess,
@@ -27,7 +29,7 @@ namespace PSAccessToken
         {
             var handle = NativeOpenProcess(access, inherit, pid);
             if (handle.IsInvalid)
-                throw new Win32Exception();
+                throw new NativeException("OpenProcess");
 
             return handle;
         }

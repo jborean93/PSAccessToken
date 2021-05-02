@@ -1,60 +1,59 @@
-using System.ComponentModel;
+using System;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
 {
     [Cmdlet(
-        VerbsCommon.Get, "ProcessHandle",
-        DefaultParameterSetName = "Current"
+        VerbsCommon.Get, "ProcessHandle"
     )]
     [OutputType(typeof(SafeHandle))]
     public class GetProcessHandleCommand : PSCmdlet
     {
         [Parameter(
-            ParameterSetName = "Current"
-        )]
-        public SwitchParameter Current { get; set; }
-
-        [Parameter(
-            Mandatory = true,
             Position = 0,
             ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "Explicit"
+            ValueFromPipelineByPropertyName = true
         )]
         [Alias("Id")]
-        public int[] ProcessId { get; set; }
+        public Int32[] ProcessId { get; set; }
 
         [Parameter(
             Position = 1,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "Explicit"
+            ValueFromPipelineByPropertyName = true
         )]
         public ProcessAccessRights Access { get; set; } = ProcessAccessRights.QueryInformation;
 
-        [Parameter(
-            ParameterSetName = "Explicit"
-        )]
+        [Parameter()]
         public SwitchParameter Inherit { get; set; }
 
         protected override void ProcessRecord()
         {
-            if (this.ParameterSetName == "Current")
-                WriteObject(NativeMethods.GetCurrentProcess());
-            else
+            if (ProcessId == null || ProcessId.Length == 0)
             {
-                foreach (int pid in ProcessId)
+                // If the user wants to inherit the existing token or get explicit access we need to use OpenProcess.
+                if (Inherit || MyInvocation.BoundParameters.ContainsKey("Access"))
+                    ProcessId = new int[] { NativeMethods.GetCurrentProcessId() };
+                else
                 {
-                    try
-                    {
-                        WriteObject(NativeMethods.OpenProcess(Access, Inherit, pid));
-                    }
-                    catch (Win32Exception e)
-                    {
-                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process handle",
-                            "OpenProcess", pid));
-                    }
+                    WriteVerbose("Calling GetCurrentProcess()");
+                    WriteObject(NativeMethods.GetCurrentProcess());
+                    return;
+                }
+            }
+
+            foreach (int pid in ProcessId)
+            {
+                WriteVerbose(String.Format("Calling OpenProcess({0})", pid));
+
+                try
+                {
+                    WriteObject(NativeMethods.OpenProcess(Access, Inherit, pid));
+                }
+                catch (NativeException e)
+                {
+                    WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process handle",
+                        pid));
                 }
             }
         }

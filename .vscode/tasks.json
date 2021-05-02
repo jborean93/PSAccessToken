@@ -29,6 +29,21 @@
             "dependsOn": [
                 "build"
             ]
+        },
+        {
+            "label": "test",
+            "command": "pwsh",
+            "type": "shell",
+            "args": [
+                "-File",
+                "${workspaceFolder}/build.ps1",
+                "-Task",
+                "Test"
+            ],
+            "problemMatcher": [],
+            "dependsOn": [
+                "build"
+            ]
         }
     ]
 }

@@ -14,7 +14,7 @@
 RootModule = 'PSAccessToken.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.1.0'
+ModuleVersion = '0.2.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,10 +69,15 @@ FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @(
+    'Get-CurrentThreadId'
     'Get-HandleInformation'
     'Get-ProcessHandle'
     'Get-ProcessToken'
     'Get-ThreadHandle'
+    'Get-ThreadToken'
+    'Get-TokenUser'
+    'Enter-TokenContext'
+    'Exit-TokenContext'
     'Set-HandleInformation'
 )
 

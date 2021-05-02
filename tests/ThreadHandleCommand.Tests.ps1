@@ -10,14 +10,6 @@ Describe "Get-ThreadHandle" {
             $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-2))
         }
 
-        It "-Current always means current process" {
-            $handle = Get-ThreadHandle -Current
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-2))
-
-            $handle = Get-ThreadHandle -Current:$false
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-2))
-        }
-
         It "Is not invalid" {
             $handle = Get-ThreadHandle
             $handle.IsInvalid | Should -Be $false
@@ -31,15 +23,24 @@ Describe "Get-ThreadHandle" {
 
             $handle.IsClosed | Should -be $true
         }
+
+        It "Inherit is not psuedo handle" {
+            $handle = Get-ThreadHandle -Inherit
+            $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-2))
+
+            $info = Get-HandleInformation -Handle $handle
+            $info.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
+        }
+
+        It "Access is not psuedo handle" {
+            $handle = Get-ThreadHandle -Access QueryInformation
+            $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-2))
+        }
     }
 
     Context "Explicit thread" {
         BeforeAll {
-            Add-Type -Namespace ThreadTest -Name Native -MemberDefinition @'
-[DllImport("Kernel32.dll")]
-public static extern int GetCurrentThreadId();
-'@
-            $tid = [ThreadTest.Native]::GetCurrentThreadId()
+            $tid = Get-CurrentThreadId
         }
 
         It "Does not use the psuedo handle" {

@@ -10,14 +10,6 @@ Describe "Get-ProcessHandle" {
             $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
         }
 
-        It "-Current always means current process" {
-            $handle = Get-ProcessHandle -Current
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
-
-            $handle = Get-ProcessHandle -Current:$false
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
-        }
-
         It "Is not invalid" {
             $handle = Get-ProcessHandle
             $handle.IsInvalid | Should -Be $false
@@ -30,6 +22,19 @@ Describe "Get-ProcessHandle" {
             $handle.Dispose()
 
             $handle.IsClosed | Should -be $true
+        }
+
+        It "Inherit is not psuedo handle" {
+            $handle = Get-ProcessHandle -Inherit
+            $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
+
+            $info = Get-HandleInformation -Handle $handle
+            $info.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
+        }
+
+        It "Access is not psuedo handle" {
+            $handle = Get-ProcessHandle -Access QueryInformation
+            $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
         }
     }
 

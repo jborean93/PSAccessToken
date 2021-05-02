@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 namespace PSAccessToken
 {
     [Cmdlet(
-        VerbsCommon.Get, "ProcessToken",
+        VerbsCommon.Get, "ThreadToken",
         DefaultParameterSetName = "Id"
     )]
     [OutputType(typeof(SafeHandle))]
-    public class GetProcessTokenCommand : PSCmdlet
+    public class GetThreadTokenCommand : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -18,7 +18,7 @@ namespace PSAccessToken
             ParameterSetName = "Id"
         )]
         [Alias("Id")]
-        public Int32[] ProcessId { get; set; }
+        public Int32[] ThreadId { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -28,7 +28,7 @@ namespace PSAccessToken
             ParameterSetName = "Handle"
         )]
         [Alias("SafeHandle")]
-        public SafeHandle[] Process { get; set; }
+        public SafeHandle[] Thread { get; set; }
 
         [Parameter(
             Position = 1,
@@ -36,49 +36,52 @@ namespace PSAccessToken
         )]
         public TokenAccessRights Access { get; set; } = TokenAccessRights.Query;
 
+        [Parameter()]
+        public SwitchParameter OpenAsSelf { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ParameterSetName == "Id")
             {
-                if (null == ProcessId || ProcessId.Length == 0)
+                if (null == ThreadId || ThreadId.Length == 0)
                 {
-                    OpenProcess(NativeMethods.GetCurrentProcess());
+                    OpenThread(NativeMethods.GetCurrentThread());
                     return;
                 }
 
-                ProcessAccessRights processAccess = ProcessAccessRights.QueryInformation |
-                    ProcessAccessRights.SetInformation;
+                ThreadAccessRights threadAccess = ThreadAccessRights.QueryInformation |
+                    ThreadAccessRights.SetInformation;
 
-                foreach (Int32 pid in ProcessId)
+                foreach (Int32 tid in ThreadId)
                 {
                     try
                     {
-                        using (SafeHandle process = NativeMethods.OpenProcess(processAccess, false, pid))
-                            OpenProcess(process);
+                        using (SafeHandle thread = NativeMethods.OpenThread(threadAccess, false, tid))
+                            OpenThread(thread);
                     }
                     catch (NativeException e)
                     {
-                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process handle",
-                            pid));
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread handle",
+                            tid));
                     }
                 }
             }
             else
             {
-                foreach (SafeHandle handle in Process)
-                    OpenProcess(handle);
+                foreach (SafeHandle handle in Thread)
+                    OpenThread(handle);
             }
         }
 
-        private void OpenProcess(SafeHandle handle)
+        private void OpenThread(SafeHandle handle)
         {
             try
             {
-                WriteObject(NativeMethods.OpenProcessToken(handle, Access));
+                WriteObject(NativeMethods.OpenThreadToken(handle, Access, OpenAsSelf));
             }
             catch (NativeException e)
             {
-                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process token",
+                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread token",
                     (Int64)handle.DangerousGetHandle()));
             }
         }

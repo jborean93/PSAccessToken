@@ -1,11 +1,21 @@
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
 {
     internal partial class NativeMethods
     {
+        [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
+        private static extern bool NativeImpersonateLoggedOnUser(
+            SafeHandle hToken
+        );
+
+        public static void ImpersonateLoggedOnUser(SafeHandle token)
+        {
+            if (!NativeImpersonateLoggedOnUser(token))
+                throw new NativeException("ImpersonateLoggedOnUser");
+        }
+
         [DllImport("Advapi32.dll", EntryPoint = "OpenProcessToken", SetLastError = true)]
         private static extern bool NativeOpenProcessToken(
             SafeHandle ProcessHandle,
@@ -17,10 +27,45 @@ namespace PSAccessToken
         {
             SafeNativeHandle handle;
             if (!NativeOpenProcessToken(process, access, out handle))
-                throw new Win32Exception();
+                throw new NativeException("OpenProcessToken");
 
             return handle;
         }
+
+        [DllImport("Advapi32.dll", EntryPoint = "OpenThreadToken", SetLastError = true)]
+        public static extern bool NativeOpenThreadToken(
+            SafeHandle ThreadHandle,
+            TokenAccessRights DesiredAccess,
+            bool OpenAsSelf,
+            out SafeNativeHandle TokenHandle
+        );
+
+        public static SafeNativeHandle OpenThreadToken(SafeHandle thread, TokenAccessRights accessRights,
+            bool openAsSelf)
+        {
+            SafeNativeHandle handle;
+            if (!NativeOpenThreadToken(thread, accessRights, openAsSelf, out handle))
+                throw new NativeException("OpenThreadToken");
+
+            return handle;
+        }
+
+        [DllImport("Advapi32.dll", EntryPoint = "RevertToSelf", SetLastError = true)]
+        private static extern bool NativeRevertToSelf();
+
+        public static void RevertToSelf()
+        {
+            if (!NativeRevertToSelf())
+                throw new NativeException("RevertToSelf");
+        }
+    }
+
+    public enum SecurityImpersonationLevel : uint
+    {
+        Anonymous = 0,
+        Identification = 1,
+        Impersonation = 2,
+        Delegation = 3,
     }
 
     [Flags]
