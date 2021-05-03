@@ -4,6 +4,7 @@
 
 * Changed `Open-ProcessToken` to `Get-ProcessToken`
 * Added the following cmdlet:
+  * [Copy-Token](docs/en-US/Copy-Token.md) - Copies an access token with new impersonation or type
   * [Enter-TokenContext](docs/en-US/Enter-TokenContext.md) - Sets the thread security context to the token specified
   * [Exit-TokenContext](docs/en-US/Exit-TokenContext.md) - Exits the thread security context that has been entered
   * [Get-CurrentThreadId](docs/en-US/Get-CurrentThreadId.md) - Gets the Thread ID of the current thread

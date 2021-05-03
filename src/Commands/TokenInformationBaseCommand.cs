@@ -143,6 +143,7 @@ namespace PSAccessToken
                             RequiredRights, OpenAsSelf))
                         {
                             WrapTokenOperation(token);
+                            return;
                         }
                     }
                     catch (NativeException e)

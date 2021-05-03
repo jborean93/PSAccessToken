@@ -41,24 +41,17 @@ namespace PSAccessToken
             if (ParameterSetName == "Id")
             {
                 if (null == ProcessId || ProcessId.Length == 0)
-                {
-                    OpenProcess(NativeMethods.GetCurrentProcess());
-                    return;
-                }
-
-                ProcessAccessRights processAccess = ProcessAccessRights.QueryInformation |
-                    ProcessAccessRights.SetInformation;
+                    ProcessId = new int[] { 0 };
 
                 foreach (Int32 pid in ProcessId)
                 {
                     try
                     {
-                        using (SafeHandle process = NativeMethods.OpenProcess(processAccess, false, pid))
-                            OpenProcess(process);
+                        WriteObject(NativeMethods.OpenProcessToken(pid, Access));
                     }
                     catch (NativeException e)
                     {
-                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process handle",
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process token",
                             pid));
                     }
                 }
@@ -66,20 +59,17 @@ namespace PSAccessToken
             else
             {
                 foreach (SafeHandle handle in Process)
-                    OpenProcess(handle);
-            }
-        }
-
-        private void OpenProcess(SafeHandle handle)
-        {
-            try
-            {
-                WriteObject(NativeMethods.OpenProcessToken(handle, Access));
-            }
-            catch (NativeException e)
-            {
-                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process token",
-                    (Int64)handle.DangerousGetHandle()));
+                {
+                    try
+                    {
+                        WriteObject(NativeMethods.OpenProcessToken(handle, Access));
+                    }
+                    catch (NativeException e)
+                    {
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get process token",
+                            (Int64)handle.DangerousGetHandle()));
+                    }
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 ---
 Module Name: PSAccessToken
 Module Guid: 5a1d20a4-bd69-4842-a9a5-1d4222dbc573
-Download Help Link: 
+Download Help Link:
 Help Version: 1.0.0
 Locale: en-US
 ---
@@ -11,6 +11,9 @@ Locale: en-US
 Manage Windows access tokens using PowerShell.
 
 ## PSAccessToken Cmdlets
+### [Copy-Token](Copy-Token.md)
+Copies an access token.
+
 ### [Enter-TokenContext](Enter-TokenContext.md)
 Enter a token impersonation context on the calling thread.
 

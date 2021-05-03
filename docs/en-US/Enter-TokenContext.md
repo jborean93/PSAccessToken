@@ -111,11 +111,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Runtime.InteropServices.SafeHandle
-
 The token handle to impersonate.
 
 ### System.Int32
-
 The process id of the process to impersonate.
 
 ## OUTPUTS

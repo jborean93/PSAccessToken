@@ -74,46 +74,24 @@ namespace PSAccessToken
                 TokenAccessRights.Impersonate;
             bool cleanup = true;
 
-            if (this.ParameterSetName == "Process")
+            try
             {
-                if (ProcessId == 0)
-                {
-                    Token = NativeMethods.OpenProcessToken(NativeMethods.GetCurrentProcess(), access);
-                }
+                if (this.ParameterSetName == "Process")
+                    Token = NativeMethods.OpenProcessToken(ProcessId, access);
+                else if (this.ParameterSetName == "Thread")
+                    Token = NativeMethods.OpenThreadToken(ThreadId, access, OpenAsSelf);
                 else
-                {
-                    using (SafeHandle process = NativeMethods.OpenProcess(ProcessAccessRights.QueryInformation,
-                        false, ProcessId))
-                    {
-                        Token = NativeMethods.OpenProcessToken(process, access);
-                    }
-                }
+                    cleanup = false;
             }
-            else if (this.ParameterSetName == "Thread")
+            catch (NativeException e)
             {
-                using (SafeHandle thread = NativeMethods.OpenThread(ThreadAccessRights.QueryInformation,
-                    false, ThreadId))
-                {
-                    Token = NativeMethods.OpenThreadToken(thread, access, OpenAsSelf);
-                }
-            }
-            else
-            {
-                cleanup = false;
+                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get token to impersonate"));
+                return;
             }
 
             try
             {
-                SecurityIdentifier sid = TokenInfo.GetUser(Token);
-                try
-                {
-                    ImpersonationState.Username = ((NTAccount)sid.Translate(typeof(NTAccount))).Value;
-                }
-                catch (IdentityNotMappedException)
-                {
-                    ImpersonationState.Username = sid.Value;
-                }
-
+                ImpersonationState.Username = GetTokenUser(Token);
                 NativeMethods.ImpersonateLoggedOnUser(Token);
             }
             catch (NativeException e)
@@ -139,6 +117,28 @@ namespace PSAccessToken
             ""[$username] $promptValue""");
 
             ImpersonationState.SetFunction(InvokeProvider, "Prompt", prompt);
+        }
+
+        private string GetTokenUser(SafeHandle token)
+        {
+            SecurityIdentifier sid;
+            try
+            {
+                sid = TokenInfo.GetUser(Token);
+            }
+            catch (NativeException)
+            {
+                return "Unknown";
+            }
+
+            try
+            {
+                return ((NTAccount)sid.Translate(typeof(NTAccount))).Value;
+            }
+            catch (IdentityNotMappedException)
+            {
+                return sid.Value;
+            }
         }
     }
 

@@ -44,24 +44,17 @@ namespace PSAccessToken
             if (ParameterSetName == "Id")
             {
                 if (null == ThreadId || ThreadId.Length == 0)
-                {
-                    OpenThread(NativeMethods.GetCurrentThread());
-                    return;
-                }
-
-                ThreadAccessRights threadAccess = ThreadAccessRights.QueryInformation |
-                    ThreadAccessRights.SetInformation;
+                    ThreadId = new int[] { 0 };
 
                 foreach (Int32 tid in ThreadId)
                 {
                     try
                     {
-                        using (SafeHandle thread = NativeMethods.OpenThread(threadAccess, false, tid))
-                            OpenThread(thread);
+                        WriteObject(NativeMethods.OpenThreadToken(tid, Access, OpenAsSelf));
                     }
                     catch (NativeException e)
                     {
-                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread handle",
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread token",
                             tid));
                     }
                 }
@@ -69,20 +62,17 @@ namespace PSAccessToken
             else
             {
                 foreach (SafeHandle handle in Thread)
-                    OpenThread(handle);
-            }
-        }
-
-        private void OpenThread(SafeHandle handle)
-        {
-            try
-            {
-                WriteObject(NativeMethods.OpenThreadToken(handle, Access, OpenAsSelf));
-            }
-            catch (NativeException e)
-            {
-                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread token",
-                    (Int64)handle.DangerousGetHandle()));
+                {
+                    try
+                    {
+                        WriteObject(NativeMethods.OpenThreadToken(handle, Access, OpenAsSelf));
+                    }
+                    catch (NativeException e)
+                    {
+                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread token",
+                            (Int64)handle.DangerousGetHandle()));
+                    }
+                }
             }
         }
     }

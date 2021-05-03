@@ -1,10 +1,35 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace PSAccessToken
 {
     internal partial class NativeMethods
     {
+        [DllImport("Advapi32.dll", EntryPoint = "DuplicateTokenEx", SetLastError = true)]
+        public static extern bool NativeDuplicateTokenEx(
+            SafeHandle hExistingToken,
+            TokenAccessRights dwDesiredAccess,
+            SafeHandle lpTokenAttributes,
+            SecurityImpersonationLevel impersonationLevel,
+            TokenType TokenType,
+            out SafeNativeHandle phNewToken
+        );
+
+        public static SafeNativeHandle DuplicateTokenEx(SafeHandle token, TokenAccessRights access,
+            SecurityAttributes attributes, SecurityImpersonationLevel impersonationLevel, TokenType tokenType)
+        {
+            using (SafeHandle secAttr = NativeHelpers.SECURITY_ATTRIBUTES.CreateBuffer(attributes))
+            {
+                SafeNativeHandle handle;
+                if (!NativeDuplicateTokenEx(token, access, secAttr, impersonationLevel, tokenType, out handle))
+                    throw new NativeException("DuplicateTokenEx");
+
+                return handle;
+            }
+        }
+
         [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
         private static extern bool NativeImpersonateLoggedOnUser(
             SafeHandle hToken
@@ -32,6 +57,20 @@ namespace PSAccessToken
             return handle;
         }
 
+        public static SafeNativeHandle OpenProcessToken(Int32 pid, TokenAccessRights accessRights)
+        {
+            SafeHandle process;
+
+            Int32 currentPid = GetCurrentProcessId();
+            if (pid == 0 || pid == currentPid)
+                process = GetCurrentProcess();
+            else
+                process = OpenProcess(ProcessAccessRights.QueryInformation, false, pid);
+
+            using (process)
+                return OpenProcessToken(process, accessRights);
+        }
+
         [DllImport("Advapi32.dll", EntryPoint = "OpenThreadToken", SetLastError = true)]
         public static extern bool NativeOpenThreadToken(
             SafeHandle ThreadHandle,
@@ -50,6 +89,21 @@ namespace PSAccessToken
             return handle;
         }
 
+        public static SafeNativeHandle OpenThreadToken(Int32 tid, TokenAccessRights accessRights,
+            bool openAsSelf)
+        {
+            SafeHandle thread;
+
+            Int32 currentTid = GetCurrentThreadId();
+            if (tid == 0 || tid == currentTid)
+                thread = GetCurrentThread();
+            else
+                thread = OpenThread(ThreadAccessRights.QueryInformation, false, tid);
+
+            using (thread)
+                return OpenThreadToken(thread, accessRights, openAsSelf);
+        }
+
         [DllImport("Advapi32.dll", EntryPoint = "RevertToSelf", SetLastError = true)]
         private static extern bool NativeRevertToSelf();
 
@@ -58,6 +112,23 @@ namespace PSAccessToken
             if (!NativeRevertToSelf())
                 throw new NativeException("RevertToSelf");
         }
+    }
+
+    public class TokenSecurity : NativeSecurity<TokenAccessRights, TokenAccessRule>
+    {
+        public TokenSecurity() : base(ResourceType.KernelObject) { }
+
+        public TokenSecurity(SafeHandle handle, AccessControlSections includeSections)
+            : base(ResourceType.KernelObject, handle, includeSections) { }
+    }
+
+    public class TokenAccessRule : AccessRule
+    {
+        public TokenAccessRights TokenAccessRights { get { return (TokenAccessRights)AccessMask; } }
+
+        public TokenAccessRule(IdentityReference identityReference, TokenAccessRights accessMask, bool isInherited,
+            InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
+            : base(identityReference, (int)accessMask, isInherited, inheritanceFlags, propagationFlags, type) { }
     }
 
     public enum SecurityImpersonationLevel : uint
@@ -93,5 +164,11 @@ namespace PSAccessToken
         Write = ReadControl | AdjustDefault | AdjustGroups | AdjustDefault,
 
         AllAccess = StandardRightsRequired | 0x1FF,
+    }
+
+    public enum TokenType : uint
+    {
+        Primary = 1,
+        Impersonation = 2,
     }
 }
