@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <AssemblyName>PSAccessToken</AssemblyName>
 
     <!--Used in test build scripts-->
-    <PSWinFramework>net471</PSWinFramework>
+    <PSWinFramework>net472</PSWinFramework>
     <PSFramework>netcoreapp3.1</PSFramework>
   </PropertyGroup>
 
@@ -17,7 +17,7 @@
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net471' ">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net472' ">
     <PackageReference Include="System.Security.AccessControl" Version="5.0.0" PrivateAssets="all" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" PrivateAssets="all" />
   </ItemGroup>
