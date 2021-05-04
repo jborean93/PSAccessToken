@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>
     <AssemblyName>PSAccessToken</AssemblyName>
+
+    <!--Used in test build scripts-->
+    <PSWinFramework>net471</PSWinFramework>
+    <PSFramework>netcoreapp3.1</PSFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">

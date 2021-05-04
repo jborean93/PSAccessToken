@@ -21,6 +21,13 @@ $IsUnix = $PSEdition -eq 'Core' -and -not $IsWindows
 $TargetFrameworks = @($csharpProjectInfo.Project.PropertyGroup.TargetFrameworks[0].Split(
     ';', [StringSplitOptions]::RemoveEmptyEntries))
 
+$PSFramework = if ($PSVersionTable.PSVersion.Major -eq 5) {
+    $csharpProjectInfo.Project.PropertyGroup.PSWinFramework[0]
+}
+else {
+    $csharpProjectInfo.Project.PropertyGroup.PSFramework[0]
+}
+
 
 task Clean {
     if (Test-Path $ReleasePath) {
@@ -49,7 +56,7 @@ task BuildManaged {
     )
     try {
         foreach ($framework in $TargetFrameworks) {
-            dotnet $arguments --framework $framework
+            dotnet @arguments --framework $framework
         }
     }
     finally {
@@ -146,20 +153,12 @@ task DoTest {
     $runspace = $null
     $proc = $null
     try {
-        # FUTURE: Find a way to make this dynamic
-        $framework = if ($PSVersionTable.PSVersion.Major -eq 5) {
-            'net471'
-        }
-        else {
-            'netcoreapp3.1'
-        }
-
         $procSplat = if ($Configuration -eq 'Debug') {
             # We use coverlet to collect code coverage of our binary
             @{
                 FilePath = 'coverlet'
                 ArgumentList = @(
-                    '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin', $framework))
+                    '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin', $PSFramework))
                     '--target', '"{0}"' -f $pwsh
                     '--targetargs', '"{0}"' -f ($arguments -join " ")
                     '--output', '"{0}"' -f ([IO.Path]::Combine($resultsPath, 'Coverage.xml'))
