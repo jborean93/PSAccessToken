@@ -38,7 +38,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: PSModule
-        path: build/*.nupkg
+        path: output/*.nupkg
 
   test:
     name: test
@@ -66,7 +66,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: PSModule
-        path: build
+        path: output
 
     - name: Install Built PowerShell Module
       shell: pwsh
@@ -75,15 +75,15 @@ jobs:
         $moduleName = $manifestItem.BaseName
         $manifest = Test-ModuleManifest -Path $manifestItem.FullName -ErrorAction Stop -WarningAction Ignore
 
-        $destPath = [IO.Path]::Combine('build', $moduleName, $manifest.Version)
+        $destPath = [IO.Path]::Combine('output', $moduleName, $manifest.Version)
         if (-not (Test-Path -LiteralPath $destPath)) {
             New-Item -Path $destPath -ItemType Directory | Out-Null
         }
 
         # WinPS doesn't support extracting from anything without a .zip extension so we need to rename it
-        Get-ChildItem build/*.nupkg | Rename-Item -NewName { $_.Name -replace '.nupkg', '.zip' }
+        Get-ChildItem output/*.nupkg | Rename-Item -NewName { $_.Name -replace '.nupkg', '.zip' }
 
-        Expand-Archive -Path build/*.zip -DestinationPath $destPath -Force -ErrorAction Stop
+        Expand-Archive -Path output/*.zip -DestinationPath $destPath -Force -ErrorAction Stop
 
     - name: Run Tests
       shell: pwsh
@@ -96,20 +96,20 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Unit Test Results (${{ matrix.info.name }})
-        path: ./build/TestResults/Pester.xml
+        path: ./output/TestResults/Pester.xml
 
     - name: Upload Coverage Results
       if: always() && !startsWith(github.ref, 'refs/tags/v')
       uses: actions/upload-artifact@v2
       with:
         name: Coverage Results (${{ matrix.info.name }})
-        path: ./build/TestResults/Coverage.xml
+        path: ./output/TestResults/Coverage.xml
 
     - name: Upload Coverage to codecov
       if: always() && !startsWith(github.ref, 'refs/tags/v')
       uses: codecov/codecov-action@v1
       with:
-        files: ./build/TestResults/Coverage.xml
+        files: ./output/TestResults/Coverage.xml
         flags: ${{ matrix.info.name }}
 
   publish:

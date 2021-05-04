@@ -11,7 +11,7 @@ $manifestItem = Get-Item ([IO.Path]::Combine($modulePath, '*.psd1'))
 $ModuleName = $manifestItem.BaseName
 $Manifest = Test-ModuleManifest -Path $manifestItem.FullName -ErrorAction Ignore -WarningAction Ignore
 $Version = $Manifest.Version
-$BuildPath = [IO.Path]::Combine($PSScriptRoot, 'build')
+$BuildPath = [IO.Path]::Combine($PSScriptRoot, 'output')
 $PowerShellPath = [IO.Path]::Combine($PSScriptRoot, 'module')
 $CSharpPath = [IO.Path]::Combine($PSScriptRoot, 'src')
 $ReleasePath = [IO.Path]::Combine($BuildPath, $ModuleName, $Version)
@@ -132,13 +132,7 @@ task DoTest {
         Remove-Item $resultsFile -ErrorAction Stop -Force
     }
 
-    $coverageOutputFile = [IO.Path]::Combine($resultsPath, 'CoverageOutput.txt')
-    if (Test-Path $coverageOutputFile) {
-        Remove-Item $coverageOutputFile -ErrorAction Stop -Force
-    }
-
-    $processScript = [IO.Path]::Combine($PSScriptRoot, 'tools', 'ProcessRunspace.ps1')
-    $processPidFile = $processScript + '.pid'
+    $pesterScript = [IO.Path]::Combine($PSScriptRoot, 'tools', 'PesterTest.ps1')
     $pwsh = [Environment]::GetCommandLineArgs()[0] -replace '\.dll$', ''
     $arguments = @(
         '-NoProfile'
@@ -146,127 +140,27 @@ task DoTest {
         if (-not $IsUnix) {
             '-ExecutionPolicy', 'Bypass'
         }
-        '-File'
-        $processScript
+        '-File', ('"{0}"' -f $pesterScript)
+        '-PesterPath', ('"{0}"' -f [IO.Path]::Combine($PSScriptRoot, 'tools', 'Modules', 'Pester'))
+        '-TestPath', ('"{0}"' -f [IO.Path]::Combine($PSScriptRoot, 'tests'))
+        '-OutputFile', ('"{0}"' -f $resultsFile)
     )
 
-    $runspace = $null
-    $proc = $null
-    try {
-        $procSplat = if ($Configuration -eq 'Debug') {
-            # We use coverlet to collect code coverage of our binary
-            @{
-                FilePath = 'coverlet'
-                ArgumentList = @(
-                    '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin', $PSFramework))
-                    '--target', '"{0}"' -f $pwsh
-                    '--targetargs', '"{0}"' -f ($arguments -join " ")
-                    '--output', '"{0}"' -f ([IO.Path]::Combine($resultsPath, 'Coverage.xml'))
-                    '--format', 'cobertura'
-                )
-                RedirectStandardOutput = $coverageOutputFile
-            }
-        }
-        else {
-            @{
-                FilePath = $pwsh
-                ArgumentList = $arguments
-            }
-        }
-        $procSplat.PassThru = $true
-        if (-not $IsUnix) {
-            $procSplat.WindowStyle = 'Hidden'
-        }
-
-        $fsWatcher = [IO.FileSystemWatcher]::new((Split-Path $processPidFile -Parent),
-            (Split-Path $processPidFile -Leaf))
-        try {
-            $fsWatcher.IncludeSubDirectories = $false
-            $fsWatcher.NotifyFilter = 'LastWrite'
-
-            # Start the process and wait until the pwsh target is online and ready
-            $proc = Start-Process @procSplat
-            [void]$fsWatcher.WaitForChanged('Changed')
-        }
-        finally {
-            $fsWatcher.Dispose()
-        }
-
-        $procPid = [Int32](Get-Content $processPidFile).Trim()
-        $connInfo = [System.Management.Automation.Runspaces.NamedPipeConnectionInfo]::new($procPid)
-        $runspace = [RunspaceFactory]::CreateRunspace($connInfo, $Host, $null)
-        $runspace.Open()
-
-        $ps = [PowerShell]::Create()
-        $ps.Runspace = $runspace
-        [void]$ps.AddScript({
-
-            [CmdletBinding()]
-            param (
-                [Parameter(Mandatory)]
-                [String]
-                $PesterPath,
-
-                [Parameter(Mandatory)]
-                [String]
-                $TestPath,
-
-                [Parameter(Mandatory)]
-                [String]
-                $OutputFile
-            )
-
-            try {
-                [PSCustomObject]$PSVersionTable |
-                    Select-Object -Property *, @{N='Architecture';E={
-                        switch ([IntPtr]::Size) {
-                            4 { 'x86' }
-                            8 { 'x64' }
-                            default { 'Unknown' }
-                        }
-                    }} |
-                    Format-List |
-                    Out-Host
-
-                Import-Module -Name $PesterPath -Force
-
-                $configuration = [PesterConfiguration]::Default
-                $configuration.Output.Verbosity = 'Detailed'
-                $configuration.Run.PassThru = $true
-                $configuration.Run.Path = $TestPath
-                $configuration.TestResult.Enabled = $true
-                $configuration.TestResult.OutputPath = $OutputFile
-                $configuration.TestResult.OutputFormat = 'NUnitXml'
-
-                Invoke-Pester -Configuration $configuration -WarningAction Ignore
-            }
-            finally {
-                # Signals the process to exit now the test is done
-                [Control]::Finished.Set()
-            }
-
-        }.ToString()).AddParameters(@{
-            PesterPath = [IO.Path]::Combine($PSScriptRoot, 'tools', 'Modules', 'Pester')
-            TestPath = [IO.Path]::Combine($PSScriptRoot, 'tests')
-            OutputFile = $resultsFile
-        })
-
-        $result = $ps.Invoke()
-
-        $ps.Streams.Error | ForEach-Object { Write-Error -ErrorRecord $_ -ErrorAction Continue }
-    }
-    finally {
-        if ($runspace) { $runspace.Dispose() }
-        if ($proc) { $proc | Wait-Process }
+    if ($Configuration -eq 'Debug') {
+        # We use coverlet to collect code coverage of our binary
+        $arguments = @(
+            '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin', $PSFramework))
+            '--target', $pwsh
+            '--targetargs', (($arguments -join " ") -replace '"', '\"')
+            '--output', ([IO.Path]::Combine($resultsPath, 'Coverage.xml'))
+            '--format', 'cobertura'
+        )
+        $pwsh = 'coverlet'
     }
 
-    if (Test-Path $coverageOutputFile) {
-        Get-Content $coverageOutputFile | Out-Host
-    }
-
-    if(-not $result -or $result.FailedCount -gt 0) {
-        $failedCount = if ($result.FailedCount) { $result.FailedCount } else { 'unknown' }
-        throw "Pester failed $failedCount tests, build failed"
+    &$pwsh $arguments
+    if($LASTEXITCODE) {
+        throw "Pester failed tests"
     }
 }
 

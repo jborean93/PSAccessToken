@@ -364,5 +364,5 @@ FodyWeavers.xsd
 ### Custom entries ###
 build/
 tools/*
-!tools/ProcessRunspace.ps1
+!tools/PesterTest.ps1
 

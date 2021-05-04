@@ -1,0 +1,1883 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<helpItems schema="maml" xmlns="http://msh">
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Copy-Token</command:name>
+      <command:verb>Copy</command:verb>
+      <command:noun>Token</command:noun>
+      <maml:description>
+        <maml:para>Copies an access token.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Copies an access token while setting whther it's a primary or impersonation token.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Copy-Token</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>Token</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill Token Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill Access Description }}</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">AssignPrimary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Duplicate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Query</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QuerySource</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustPrivileges</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustGroups</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustDefault</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustSessionId</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Execute</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Read</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Write</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ImpersonationLevel</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill ImpersonationLevel Description }}</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Anonymous</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Identification</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delegation</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">SecurityImpersonationLevel</command:parameterValue>
+          <dev:type>
+            <maml:name>SecurityImpersonationLevel</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Inherit</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill Inherit Description }}</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>SecurityDescriptor</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill SecurityDescriptor Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">NativeObjectSecurity</command:parameterValue>
+          <dev:type>
+            <maml:name>NativeObjectSecurity</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>TokenType</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill TokenType Description }}</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Primary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonation</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenType</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenType</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Access</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill Access Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+        <dev:type>
+          <maml:name>TokenAccessRights</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ImpersonationLevel</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill ImpersonationLevel Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SecurityImpersonationLevel</command:parameterValue>
+        <dev:type>
+          <maml:name>SecurityImpersonationLevel</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Inherit</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill Inherit Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>SecurityDescriptor</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill SecurityDescriptor Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">NativeObjectSecurity</command:parameterValue>
+        <dev:type>
+          <maml:name>NativeObjectSecurity</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>Token</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill Token Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>TokenType</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill TokenType Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">TokenType</command:parameterValue>
+        <dev:type>
+          <maml:name>TokenType</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:remarks>
+          <maml:para>{{ Add example description here }}</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Enter-TokenContext</command:name>
+      <command:verb>Enter</command:verb>
+      <command:noun>TokenContext</command:noun>
+      <maml:description>
+        <maml:para>Enter a token impersonation context on the calling thread.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Impersonate the security context of the process, thread, or explicit token in the current thread. Only one token context can be impersonated at a time, call `Exit-TokenContext` to diable impersonation.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Enter-TokenContext</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>OpenAsSelf</maml:name>
+          <maml:description>
+            <maml:para>Opens the thread token using the current process security context rather than the current thread one.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>ThreadId</maml:name>
+          <maml:description>
+            <maml:para>Impersonates the specified thread, will fail if the thread does not have a token assigned to it.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Enter-TokenContext</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+          <maml:name>ProcessId</maml:name>
+          <maml:description>
+            <maml:para>Impersonates the specified process. If omitted then the current process is impersonated.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Enter-TokenContext</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>Token</maml:name>
+          <maml:description>
+            <maml:para>Impersonates the specified token. The token must have `Duplicate` and `Query` rights if it's a primary token and `Impersonate` and `Query` rights if it's an impersonation token.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>OpenAsSelf</maml:name>
+        <maml:description>
+          <maml:para>Opens the thread token using the current process security context rather than the current thread one.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+        <maml:name>ProcessId</maml:name>
+        <maml:description>
+          <maml:para>Impersonates the specified process. If omitted then the current process is impersonated.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>ThreadId</maml:name>
+        <maml:description>
+          <maml:para>Impersonates the specified thread, will fail if the thread does not have a token assigned to it.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>Token</maml:name>
+        <maml:description>
+          <maml:para>Impersonates the specified token. The token must have `Duplicate` and `Query` rights if it's a primary token and `Impersonate` and `Query` rights if it's an impersonation token.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The token handle to impersonate.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process id of the process to impersonate.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>Entering a security context changes the current prompt to show the username of that context in the prompt message.</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>--------------- Impersonate the current process ---------------</maml:title>
+        <dev:code>PS C:\&gt; Enter-TokenContext</dev:code>
+        <dev:remarks>
+          <maml:para>Impersonate the current process in the current thread. This is useful for enabling/disabling privileges for the current thread instead of process wise.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>ImpersonateLoggedOnUser</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-impersonateloggedonuser</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Exit-TokenContext</command:name>
+      <command:verb>Exit</command:verb>
+      <command:noun>TokenContext</command:noun>
+      <maml:description>
+        <maml:para>Exits the current thread impersonation context.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Exits the current thread impersonation context set up by `Enter-TokenContext</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Exit-TokenContext</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------- Exit the current thread impersonation context --------</maml:title>
+        <dev:code>[DOMAIN\Username] PS C:\&gt; Exit-TokenContext</dev:code>
+        <dev:remarks>
+          <maml:para>Exits the currently set up thread impersonation context.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>RevertToSelf</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-reverttoself</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-CurrentThreadId</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>CurrentThreadId</command:noun>
+      <maml:description>
+        <maml:para>Get the current thread identifier.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the current thread identifier, otherwise known as the tid.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-CurrentThreadId</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Int32</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The thread id.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>This identifier is not the same as the .NET managed thread id. This is the system thread identifier, similar to the process id.</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Get-CurrentThreadId</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the current thread id.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>GetCurrentThreadId</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentthreadid</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-HandleInformation</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>HandleInformation</command:noun>
+      <maml:description>
+        <maml:para>Get information on a Windows handle.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Get handle information such as whether it is inheritable or protected from being closed.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-HandleInformation</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>Handle</maml:name>
+          <maml:description>
+            <maml:para>The handle, or list of handles, to get the handle information for.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>Handle</maml:name>
+        <maml:description>
+          <maml:para>The handle, or list of handles, to get the handle information for.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The handls to get the handle information for.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PSAccessToken.HandleFlags</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The flags that apply to that handle. There are 3 flags that can be set</maml:para>
+          <maml:para>* None: No flags are set</maml:para>
+          <maml:para>* Inherit: A child process created with the inherit handles option will inherit this handle</maml:para>
+          <maml:para>* ProtectFromClose: Closing/disposing the handle will not work with this flag set</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------- Get handle information --------------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234
+PS C:\&gt; Get-HandleInformation -Handle $handle</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle flags for the opened process handle.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>GetHandleInformation</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-gethandleinformation</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-ProcessHandle</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>ProcessHandle</command:noun>
+      <maml:description>
+        <maml:para>Get a handle to the current process or the process specified.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets a handle to the current process or the process specified. This handle can be used for further actions on the process that was opened. When parameters are specified then the handle is a pseudo handle with full access rights to the current process.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-ProcessHandle</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+          <maml:name>ProcessId</maml:name>
+          <maml:description>
+            <maml:para>The process ID, or list of, to open the handle for.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access rights to the process object. The default is `QueryInformation` which allows you to query information about the process. If specified without a `ProcessId` then the process handle is for the current process with the access specified.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Terminate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">CreateThread</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">VMOperation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">VMRead</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">VMWrite</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">DupHandle</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">CreateProcess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetQuota</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QueryInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SuspendResume</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QueryLimitedInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Synchronize</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">ProcessAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>ProcessAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Inherit</maml:name>
+          <maml:description>
+            <maml:para>The handle can be inherited by any child processes spawned by the caller process. When specified without a `ProcessId` then the process handle is for the current process that is inheritable.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>Access</maml:name>
+        <maml:description>
+          <maml:para>The desired access rights to the process object. The default is `QueryInformation` which allows you to query information about the process. If specified without a `ProcessId` then the process handle is for the current process with the access specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">ProcessAccessRights</command:parameterValue>
+        <dev:type>
+          <maml:name>ProcessAccessRights</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Inherit</maml:name>
+        <maml:description>
+          <maml:para>The handle can be inherited by any child processes spawned by the caller process. When specified without a `ProcessId` then the process handle is for the current process that is inheritable.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+        <maml:name>ProcessId</maml:name>
+        <maml:description>
+          <maml:para>The process ID, or list of, to open the handle for.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process ID(s) to open the handle for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PSAccessToken.ProcessAccessRights</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The desired access rights for the opened process handle.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The wrapped SafeHandle of the process. This handle should be explicitly disposed with the `.Dispose()` method as soon as it isn't needed.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------ Get current process handle ------------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the current process with `AllAccess` rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------------ Get process handle for another process ------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the process with the PID of 1234.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>Get process handle for another process with custom access rights</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234 -Access DupHandle, QueryInformation</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the process with the PID of 1234 with DupHandle and QueryInformation access rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>GetCurrentProcess</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>OpenProcess</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-ProcessToken</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>ProcessToken</command:noun>
+      <maml:description>
+        <maml:para>Gets the access token associated with a process.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the access token for the current or specific process.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-ProcessToken</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="SafeHandle">
+          <maml:name>Process</maml:name>
+          <maml:description>
+            <maml:para>The process handle, or list of handles, to get the access token for. Use Get-ProcessHandle to get a process handle for another process. When omitted the access token for the current process is used.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">AssignPrimary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Duplicate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Query</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QuerySource</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustPrivileges</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustGroups</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustDefault</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustSessionId</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Execute</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Read</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Write</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-ProcessToken</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">AssignPrimary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Duplicate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Query</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QuerySource</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustPrivileges</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustGroups</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustDefault</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustSessionId</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Execute</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Read</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Write</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="Id">
+          <maml:name>ProcessId</maml:name>
+          <maml:description>
+            <maml:para>The process id, or list of pids, to get the access token for.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>Access</maml:name>
+        <maml:description>
+          <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+        <dev:type>
+          <maml:name>TokenAccessRights</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="SafeHandle">
+        <maml:name>Process</maml:name>
+        <maml:description>
+          <maml:para>The process handle, or list of handles, to get the access token for. Use Get-ProcessHandle to get a process handle for another process. When omitted the access token for the current process is used.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="Id">
+        <maml:name>ProcessId</maml:name>
+        <maml:description>
+          <maml:para>The process id, or list of pids, to get the access token for.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process ids to get the access token for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process handles to get the access token for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PSAccessToken.TokenAccessRights</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The desired access rights for the access token.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The access token that was opened. Make sure to call `.Dispose()` when finished with the token to close the unmanaged resource that it relates to.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>----------- Get access token for the current process -----------</maml:title>
+        <dev:code>PS C:\&gt; $token = Get-ProcessToken</dev:code>
+        <dev:remarks>
+          <maml:para>Get the token for the current process with Query rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>OpenProcessToken</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocesstoken</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-ThreadHandle</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>ThreadHandle</command:noun>
+      <maml:description>
+        <maml:para>Get a handle to the current thread of the thread specified.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets a handle to the current thread of the thread specified. This handle can be used for further actions on the thread that was opened. When no parameters ares specified then the handle is a psuedo handle with full access rights to the current thread.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-ThreadHandle</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+          <maml:name>ThreadId</maml:name>
+          <maml:description>
+            <maml:para>The thread ID, or list of, to open the handle for.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access rights to the thread object. The default is `QueryInformation` which allows you to query information about the process. If specified without a `ThreadId` then the thread handle is for the current thread with the access specified.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Terminate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SuspendResume</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">GetContext</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetContext</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QueryInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetThreadToken</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">DirectImpersonation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">SetLimitedInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QueryLimitedInformation</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Synchronize</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">ThreadAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>ThreadAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Inherit</maml:name>
+          <maml:description>
+            <maml:para>The handle can be inherited by any child processes spawned by the caller process. When specified without a `ThreadId` then the thread handle is for the current thread that is inheritable.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>Access</maml:name>
+        <maml:description>
+          <maml:para>The desired access rights to the thread object. The default is `QueryInformation` which allows you to query information about the process. If specified without a `ThreadId` then the thread handle is for the current thread with the access specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">ThreadAccessRights</command:parameterValue>
+        <dev:type>
+          <maml:name>ThreadAccessRights</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Inherit</maml:name>
+        <maml:description>
+          <maml:para>The handle can be inherited by any child processes spawned by the caller process. When specified without a `ThreadId` then the thread handle is for the current thread that is inheritable.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+        <maml:name>ThreadId</maml:name>
+        <maml:description>
+          <maml:para>The thread ID, or list of, to open the handle for.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The thread ID(s) to open the handle for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PSAccessToken.ThreadAccessRights</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The desired access rights for the opened thread handle.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The wrapped SafeHandle of the thread. This handle should be explicitly disposed with the `.Dispose()` method as soon as it isn't needed.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------ Get current thread handle ------------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ThreadHandle</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the current thread with `AllAccess` rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------------- Get thread handle for another thread -------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ThreadHandle -ThreadId 1234</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the thread with the TID of 1234.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>Get thread handle for another thread with custom access rights</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ThreadHandle -ThreadId 1234 -Access Impersonate, QueryInformation</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the handle to the thread with the TID of 1234 with Impersonate and QueryInformation access rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>GetCurrentThread</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentthread</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>OpenThread</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openthread</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-ThreadToken</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>ThreadToken</command:noun>
+      <maml:description>
+        <maml:para>Gets the access token associated with a thread.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the access token for the current or specific thread. This may fail if the thread is not associated with any token, e.g. it's not impersonating anything.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-ThreadToken</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="SafeHandle">
+          <maml:name>Thread</maml:name>
+          <maml:description>
+            <maml:para>The thread handle, or list of handles, to get the access token for. Use Get-TokenHandle to get a process handle for another process. When omitted the access token for the current thread is used.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">AssignPrimary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Duplicate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Query</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QuerySource</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustPrivileges</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustGroups</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustDefault</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustSessionId</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Execute</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Read</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Write</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>OpenAsSelf</maml:name>
+          <maml:description>
+            <maml:para>Will open the token using the security context of the process rather than the current thread. Setting this switch allows the caller to open a thread token using the normal process context rather than the current thread impersonation context.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-ThreadToken</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+          <maml:name>ThreadId</maml:name>
+          <maml:description>
+            <maml:para>The thread id, or list of tids, to get the access token for.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Access</maml:name>
+          <maml:description>
+            <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">AssignPrimary</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Duplicate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Impersonate</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Query</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">QuerySource</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustPrivileges</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustGroups</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustDefault</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AdjustSessionId</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Delete</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">ReadControl</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Execute</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Read</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Write</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteDAC</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">WriteOwner</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">StandardRightsRequired</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AllAccess</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">AccessSystemSecurity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+          <dev:type>
+            <maml:name>TokenAccessRights</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>OpenAsSelf</maml:name>
+          <maml:description>
+            <maml:para>Will open the token using the security context of the process rather than the current thread. Setting this switch allows the caller to open a thread token using the normal process context rather than the current thread impersonation context.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>Access</maml:name>
+        <maml:description>
+          <maml:para>The desired access for the access token. Defaults to Query which can be used to retrieve most readonly properties of a token.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">TokenAccessRights</command:parameterValue>
+        <dev:type>
+          <maml:name>TokenAccessRights</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>OpenAsSelf</maml:name>
+        <maml:description>
+          <maml:para>Will open the token using the security context of the process rather than the current thread. Setting this switch allows the caller to open a thread token using the normal process context rather than the current thread impersonation context.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="SafeHandle">
+        <maml:name>Thread</maml:name>
+        <maml:description>
+          <maml:para>The thread handle, or list of handles, to get the access token for. Use Get-TokenHandle to get a process handle for another process. When omitted the access token for the current thread is used.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+        <maml:name>ThreadId</maml:name>
+        <maml:description>
+          <maml:para>The thread id, or list of tids, to get the access token for.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The thread ids to get the access token for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The thread handles to get the access token for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PSAccessToken.TokenAccessRights</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The desired access rights for the access token.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The access token that was opened. Make sure to call `.Dispose()` when finished with the token to close the unmanaged resource that it related to.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>----------- Get access token for the current thread -----------</maml:title>
+        <dev:code>PS C:\&gt; $token = Get-ThreadToken</dev:code>
+        <dev:remarks>
+          <maml:para>Get the token for the current thread with Query rights.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>OpenThreadToken</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openthreadtoken</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-TokenUser</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>TokenUser</command:noun>
+      <maml:description>
+        <maml:para>Get the user associated with an access token.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Get the `TokenUser` associated with an access token.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-TokenUser</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IdentityType</maml:name>
+          <maml:description>
+            <maml:para>The output identity type to use when outputting the username. Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Type</command:parameterValue>
+          <dev:type>
+            <maml:name>Type</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>OpenAsSelf</maml:name>
+          <maml:description>
+            <maml:para>Will open the thread id specified using the process level security context instead of the thread level context.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>ThreadId</maml:name>
+          <maml:description>
+            <maml:para>Gets the token user for the thread specified. The thread must be impersonating a token for this to be valid.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-TokenUser</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+          <maml:name>ProcessId</maml:name>
+          <maml:description>
+            <maml:para>Gets the token user for the process specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IdentityType</maml:name>
+          <maml:description>
+            <maml:para>The output identity type to use when outputting the username. Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Type</command:parameterValue>
+          <dev:type>
+            <maml:name>Type</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-TokenUser</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>Token</maml:name>
+          <maml:description>
+            <maml:para>Gets the token user for the token handle specified. This can be a process or thread token already retrieved or created.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IdentityType</maml:name>
+          <maml:description>
+            <maml:para>The output identity type to use when outputting the username. Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Type</command:parameterValue>
+          <dev:type>
+            <maml:name>Type</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-TokenUser</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IdentityType</maml:name>
+          <maml:description>
+            <maml:para>The output identity type to use when outputting the username. Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Type</command:parameterValue>
+          <dev:type>
+            <maml:name>Type</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseProcessToken</maml:name>
+          <maml:description>
+            <maml:para>Get the token user for the current process security context rather than the current thread impersonation context.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>IdentityType</maml:name>
+        <maml:description>
+          <maml:para>The output identity type to use when outputting the username. Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Type</command:parameterValue>
+        <dev:type>
+          <maml:name>Type</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>OpenAsSelf</maml:name>
+        <maml:description>
+          <maml:para>Will open the thread id specified using the process level security context instead of the thread level context.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="Id">
+        <maml:name>ProcessId</maml:name>
+        <maml:description>
+          <maml:para>Gets the token user for the process specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>ThreadId</maml:name>
+        <maml:description>
+          <maml:para>Gets the token user for the thread specified. The thread must be impersonating a token for this to be valid.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>Token</maml:name>
+        <maml:description>
+          <maml:para>Gets the token user for the token handle specified. This can be a process or thread token already retrieved or created.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UseProcessToken</maml:name>
+        <maml:description>
+          <maml:para>Get the token user for the current process security context rather than the current thread impersonation context.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process or token handle(s) to get the token user for.</maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Int32[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The process id(s) to get the token user for.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Security.Principal.IdentityReference</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The token user as an IdentityReference. The output type defaults to `NTAccount` but can be specified with `-IdentityType`</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------- Get the username of the current security context -------</maml:title>
+        <dev:code>PS C:\&gt; Get-TokenUser</dev:code>
+        <dev:remarks>
+          <maml:para>Gets the NTAccount of the current security context.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>GetTokenInformation</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>TOKEN_INFORMATION_CLASS</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Set-HandleInformation</command:name>
+      <command:verb>Set</command:verb>
+      <command:noun>HandleInformation</command:noun>
+      <maml:description>
+        <maml:para>Sets certain property of a Windows handle.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Sets the Inherit or ProtectFromClose properties of a Windows handle.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Set-HandleInformation</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>Handle</maml:name>
+          <maml:description>
+            <maml:para>The handle, or list of handles, to set the information on.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+          <dev:type>
+            <maml:name>SafeHandle[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Clear</maml:name>
+          <maml:description>
+            <maml:para>When set then all the existing flags will be unset except for the parameters specified. When unset, or not specified, the parameters specified add to the existing flags already set. Use this to clear any existing handle flags you don't want to be set.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Inherit</maml:name>
+          <maml:description>
+            <maml:para>Whether to set the Inherit flag on the handle(s) specified.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ProtectFromClose</maml:name>
+          <maml:description>
+            <maml:para>Whether to set the ProtectFromClose flag on the handle(s) specified.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+          <maml:name>WhatIf</maml:name>
+          <maml:description>
+            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Clear</maml:name>
+        <maml:description>
+          <maml:para>When set then all the existing flags will be unset except for the parameters specified. When unset, or not specified, the parameters specified add to the existing flags already set. Use this to clear any existing handle flags you don't want to be set.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>Handle</maml:name>
+        <maml:description>
+          <maml:para>The handle, or list of handles, to set the information on.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SafeHandle[]</command:parameterValue>
+        <dev:type>
+          <maml:name>SafeHandle[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Inherit</maml:name>
+        <maml:description>
+          <maml:para>Whether to set the Inherit flag on the handle(s) specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ProtectFromClose</maml:name>
+        <maml:description>
+          <maml:para>Whether to set the ProtectFromClose flag on the handle(s) specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
+        <maml:description>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+        <maml:name>WhatIf</maml:name>
+        <maml:description>
+          <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Runtime.InteropServices.SafeHandle[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The handles to set the information on.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>----------------- Set a handle as inheritable -----------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234
+PS C:\&gt; Set-HandleInformation -Handle $handle -Inherit</dev:code>
+        <dev:remarks>
+          <maml:para>Sets the specified handles are inheritable, keeping any existing flags.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-- Set a handle with protect from close and clear other flags --</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234
+PS C:\&gt; Set-HandleInformation -Handle $handle -ProtectFromClose -Clear</dev:code>
+        <dev:remarks>
+          <maml:para>Protects the handle from being closed and clears any other flags like Inherit.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------- Clear all handle flags --------------------</maml:title>
+        <dev:code>PS C:\&gt; $handle = Get-ProcessHandle -ProcessId 1234
+PS C:\&gt; Set-HandleInformation -Handle $handle -Clear</dev:code>
+        <dev:remarks>
+          <maml:para>Clears the Inherit and ProtectFromClose flags on the handle.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>SetHandleInformation</maml:linkText>
+        <maml:uri>https://docs.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-sethandleinformation</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+</helpItems>
