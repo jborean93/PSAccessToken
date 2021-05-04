@@ -20,6 +20,10 @@ Describe "Get-ThreadToken" {
             $thread = Get-ThreadHandle
         }
 
+        AfterAll {
+            $thread.Dispose()
+        }
+
         It "Failure with no impersonation" {
             $out = Get-ThreadToken -Thread $thread -ErrorAction SilentlyContinue -ErrorVariable err
 

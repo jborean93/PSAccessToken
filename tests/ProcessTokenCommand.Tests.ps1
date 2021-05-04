@@ -7,9 +7,13 @@ Describe "Get-ProcessToken" {
     Context "Current process" {
         It "Gets token" {
             $handle = Get-ProcessToken
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Closes the token" {
@@ -25,23 +29,40 @@ Describe "Get-ProcessToken" {
             $process = Get-ProcessHandle
         }
 
+        AfterAll {
+            $process.Dispose()
+        }
+
         It "Gets token" {
             $handle = Get-ProcessToken -Process $process
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Pipe handle to input" {
             $handle = $process | Get-ProcessToken
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Fails to open token - invalid access" {
             $limitedProcess = Get-ProcessHandle -Id $pid -Access CreateProcess
-            $out = Get-ProcessToken -Process $limitedProcess -ErrorVariable err -ErrorAction SilentlyContinue
+            try {
+                $out = Get-ProcessToken -Process $limitedProcess -ErrorVariable err -ErrorAction SilentlyContinue
+            }
+            finally {
+                $limitedProcess.Dispose()
+            }
 
             $out | Should -Be $null
             $err.Count | Should -Be 1

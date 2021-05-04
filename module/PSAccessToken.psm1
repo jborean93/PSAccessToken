@@ -3,11 +3,15 @@
 
 $importModule = Get-Command -Name Import-Module -Module Microsoft.PowerShell.Core
 if (-not ('PSAccessToken.Commands.ProcessHandleCommand' -as [type])) {
-    if ($PSVersionTable.PSVersion.Major -eq 5) {
-        &$importModule $PSScriptRoot\bin\net472\PSAccessToken.dll -ErrorAction Stop
-    } else {
-        &$importModule $PSScriptRoot\bin\netcoreapp3.1\PSAccessToken.dll -ErrorAction Stop
+    $framework = if ($PSVersionTable.PSVersion.Major -eq 5) {
+        'net472'
     }
-} else {
+    else {
+        'netcoreapp3.1'
+    }
+
+    &$importModule ([IO.Path]::Combine($PSScriptRoot, 'bin', $framework, 'PSAccessToken.dll')) -ErrorAction Stop
+}
+else {
     &$importModule -Force -Assembly ([PSAccessToken.Commands.ProcessHandleCommand].Assembly)
 }
