@@ -17,6 +17,10 @@ $CSharpPath = [IO.Path]::Combine($PSScriptRoot, 'src')
 $ReleasePath = [IO.Path]::Combine($BuildPath, $ModuleName, $Version)
 $IsUnix = $PSEdition -eq 'Core' -and -not $IsWindows
 
+[xml]$csharpProjectInfo = Get-Content ([IO.Path]::Combine($CSharpPath, '*.csproj'))
+$TargetFrameworks = @($csharpProjectInfo.Project.PropertyGroup.TargetFrameworks[0].Split(
+    ';', [StringSplitOptions]::RemoveEmptyEntries))
+
 
 task Clean {
     if (Test-Path $ReleasePath) {
@@ -44,7 +48,9 @@ task BuildManaged {
         "-p:Version=$Version"
     )
     try {
-        dotnet $arguments
+        foreach ($framework in $TargetFrameworks) {
+            dotnet $arguments --framework $framework
+        }
     }
     finally {
         Pop-Location
@@ -60,12 +66,14 @@ task CopyToRelease {
     }
     Copy-Item @copyParams
 
-    $buildFolder = [IO.Path]::Combine($CSharpPath, 'bin', $Configuration, 'netstandard2.0', 'publish')
-    $binFolder = [IO.Path]::Combine($ReleasePath, 'bin')
-    if (-not (Test-Path -LiteralPath $binFolder)) {
-        New-Item -Path $binFolder -ItemType Directory | Out-Null
+    foreach ($framework in $TargetFrameworks) {
+        $buildFolder = [IO.Path]::Combine($CSharpPath, 'bin', $Configuration, $framework, 'publish')
+        $binFolder = [IO.Path]::Combine($ReleasePath, 'bin', $framework)
+        if (-not (Test-Path -LiteralPath $binFolder)) {
+            New-Item -Path $binFolder -ItemType Directory | Out-Null
+        }
+        Copy-Item ([IO.Path]::Combine($buildFolder, "*")) -Destination $binFolder
     }
-    Copy-Item ([IO.Path]::Combine($buildFolder, "$ModuleName.*")) -Destination $binFolder
 }
 
 task Package {
@@ -138,12 +146,20 @@ task DoTest {
     $runspace = $null
     $proc = $null
     try {
+        # FUTURE: Find a way to make this dynamic
+        $framework = if ($PSVersionTable.PSVersion.Major -eq 5) {
+            'net471'
+        }
+        else {
+            'netcoreapp3.1'
+        }
+
         $procSplat = if ($Configuration -eq 'Debug') {
             # We use coverlet to collect code coverage of our binary
             @{
                 FilePath = 'coverlet'
                 ArgumentList = @(
-                    '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin'))
+                    '"{0}"' -f ([IO.Path]::Combine($ReleasePath, 'bin', $framework))
                     '--target', '"{0}"' -f $pwsh
                     '--targetargs', '"{0}"' -f ($arguments -join " ")
                     '--output', '"{0}"' -f ([IO.Path]::Combine($resultsPath, 'Coverage.xml'))
