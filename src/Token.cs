@@ -173,6 +173,11 @@ namespace PSAccessToken
         Read = ReadControl | Query,
         Write = ReadControl | AdjustDefault | AdjustGroups | AdjustDefault,
 
+        GenericAll = 0x10000000,
+        GenericExecute = 0x20000000,
+        GenericWrite = 0x4000000,
+        GenericRead = 0x80000000,
+
         AllAccess = StandardRightsRequired | 0x1FF,
     }
 

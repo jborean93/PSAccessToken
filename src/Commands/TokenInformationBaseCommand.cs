@@ -163,22 +163,5 @@ namespace PSAccessToken
                 WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to open current identity"));
             }
         }
-
-        protected void WriteIdentityReference(IdentityReference value, Type outputType)
-        {
-            try
-            {
-                WriteObject(value.Translate(outputType));
-            }
-            catch (IdentityNotMappedException e)
-            {
-                ErrorRecord err = new ErrorRecord(e, String.Format("{0}.{1}", MyInvocation.MyCommand.Name, nameof(e)),
-                    ErrorCategory.InvalidType, value);
-                err.ErrorDetails = new ErrorDetails(String.Format("Failed to translate {0} to {1}: {2}",
-                    value.Value, outputType.Name, e.Message));
-
-                WriteError(err);
-            }
-        }
     }
 }

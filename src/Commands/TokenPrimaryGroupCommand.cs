@@ -19,7 +19,7 @@ namespace PSAccessToken
         protected override void TokenOperation(SafeHandle token)
         {
             SecurityIdentifier sid = TokenInfo.GetPrimaryGroup(token);
-            WriteIdentityReference(sid, IdentityType);
+            WriteObject(PrincipalHelper.TranslateIdentifier(sid, IdentityType));
         }
     }
 }

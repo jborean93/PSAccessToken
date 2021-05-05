@@ -70,6 +70,8 @@ FunctionsToExport = @()
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @(
     'Copy-Token'
+    'Enter-TokenContext'
+    'Exit-TokenContext'
     'Get-CurrentThreadId'
     'Get-HandleInformation'
     'Get-ProcessHandle'
@@ -82,8 +84,7 @@ CmdletsToExport = @(
     'Get-TokenPrimaryGroup'
     'Get-TokenType'
     'Get-TokenUser'
-    'Enter-TokenContext'
-    'Exit-TokenContext'
+    'New-TokenSecurity'
     'Set-HandleInformation'
 )
 
