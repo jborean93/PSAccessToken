@@ -34,36 +34,48 @@ namespace PSAccessToken
 
         public static SafeMemoryBuffer GetTokenInformation(SafeHandle handle, TokenInformationClass infoClass)
         {
-            int returnLength;
-            bool res = NativeGetTokenInformation(handle, infoClass, SafeMemoryBuffer.NullBuffer, 0,
-                out returnLength);
-            int errCode = Marshal.GetLastWin32Error();
+            int bufferSize = 0;
+            SafeMemoryBuffer buffer = SafeMemoryBuffer.NullBuffer;
 
-            if (!res && (errCode != (int)Win32ErrorCode.ERROR_BAD_LENGTH &&
-                    errCode != (int)Win32ErrorCode.ERROR_INSUFFICIENT_BUFFER))
-                throw new NativeException("GetTokenInformation", errCode);
-
-            SafeMemoryBuffer buffer = new SafeMemoryBuffer(returnLength);
-            if (!NativeGetTokenInformation(handle, infoClass, buffer, returnLength, out returnLength))
+            while (true)
             {
-                buffer.Dispose();
-                throw new NativeException("GetTokenInformation");
-            }
+                int returnLength;
+                if (NativeGetTokenInformation(handle, infoClass, buffer, bufferSize, out returnLength))
+                    return buffer;
 
-            return buffer;
+                int errCode = Marshal.GetLastWin32Error();
+                buffer.Dispose();
+                if (errCode != (int)Win32ErrorCode.ERROR_BAD_LENGTH &&
+                    errCode != (int)Win32ErrorCode.ERROR_INSUFFICIENT_BUFFER)
+                {
+                    throw new NativeException("GetTokenInformation", errCode);
+                }
+
+                buffer = new SafeMemoryBuffer(returnLength);
+                bufferSize = returnLength;
+            }
         }
     }
 
     internal class SafeMemoryBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public static readonly SafeMemoryBuffer NullBuffer = new SafeMemoryBuffer(IntPtr.Zero);
+        public static readonly SafeMemoryBuffer NullBuffer = new SafeMemoryBuffer(IntPtr.Zero, false);
 
-        public SafeMemoryBuffer() : base(true) { }
         public SafeMemoryBuffer(int cb) : this(Marshal.AllocHGlobal(cb)) { }
 
-        public SafeMemoryBuffer(IntPtr handle) : base(true)
+        public SafeMemoryBuffer(IntPtr handle) : this(handle, true) { }
+
+        public SafeMemoryBuffer(IntPtr handle, bool ownsHandle) : base(ownsHandle)
         {
             base.SetHandle(handle);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (this == NullBuffer)
+                return;
+
+            base.Dispose(disposing);
         }
 
         protected override bool ReleaseHandle()

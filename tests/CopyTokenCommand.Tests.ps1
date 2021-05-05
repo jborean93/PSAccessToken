@@ -120,4 +120,19 @@ Describe "Copy-Token" {
             $dup.Dispose()
         }
     }
+
+    It "Fails without duplicate access" {
+        $limitedToken = Get-ProcessToken -Access Query
+        try {
+            $out = $limitedToken, $limitedToken | Copy-Token -ErrorVariable err -ErrorAction SilentlyContinue
+
+            $out | Should -Be $null
+            $err.Count | Should -Be 2
+            $err[0] | Should -BeLike 'Failed to copy access token*Access is denied*'
+            $err[1] | Should -BeLike 'Failed to copy access token*Access is denied*'
+        }
+        finally {
+            $limitedToken.Dispose()
+        }
+    }
 }

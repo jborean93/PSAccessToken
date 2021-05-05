@@ -45,6 +45,12 @@ Describe "Get-TokenUser" {
 
             $actual | Should -Be $currentSid
         }
+
+        It "Fails with invalid IdentityType" {
+            $expType = [Management.Automation.ParameterBindingException]
+            { Get-TokenUser -IdentityType ([String]) } |
+                Should -Throw "*Type must be subclass of IdentityReference" -ExceptionType $expType
+        }
     }
 
     Context "ProcessId" {

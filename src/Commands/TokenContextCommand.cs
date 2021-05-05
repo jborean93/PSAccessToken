@@ -121,15 +121,7 @@ namespace PSAccessToken
 
         private string GetTokenUser(SafeHandle token)
         {
-            SecurityIdentifier sid;
-            try
-            {
-                sid = TokenInfo.GetUser(Token);
-            }
-            catch (NativeException)
-            {
-                return "Unknown";
-            }
+            SecurityIdentifier sid = TokenInfo.GetUser(Token);
 
             try
             {

@@ -24,12 +24,14 @@ namespace PSAccessToken
             {
                 WriteObject(sid.Translate(IdentityType));
             }
-            catch (IdentityNotMappedException)
+            catch (IdentityNotMappedException e)
             {
-                WriteError(new ErrorRecord(
-                    new Exception(""),
-                    "", ErrorCategory.InvalidType, IdentityType.Name
-                ));
+                ErrorRecord err = new ErrorRecord(e, String.Format("Get-TokenUser.{0}", nameof(e)),
+                    ErrorCategory.InvalidType, sid);
+                err.ErrorDetails = new ErrorDetails(String.Format("Failed to translate {0} to {1}: {2}",
+                    sid.Value, IdentityType.Name, e.Message));
+
+                WriteError(err);
             }
         }
     }

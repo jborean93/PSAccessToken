@@ -65,5 +65,13 @@ Describe "Get-ProcessToken" {
             $err.Count | Should -Be 1
             $err[0] | Should -BeLike 'Failed to get process token*Access is denied*'
         }
+
+        It "Fails to open token with pid" {
+            $out = Get-ProcessToken -ProcessId 4 -ErrorVariable err -ErrorAction SilentlyContinue
+
+            $out | Should -Be $null
+            $err.Count | Should -Be 1
+            $err[0] | Should -BeLike 'Failed to get process token*Access is denied*'
+        }
     }
 }
