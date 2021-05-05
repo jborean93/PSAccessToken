@@ -1,10 +1,9 @@
-$moduleName   = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '..', 'module', '*.psd1'))).BaseName
-$manifestPath = [IO.Path]::Combine($PSScriptRoot, '..', 'output', $moduleName)
-
-Import-Module $manifestPath
+. ([IO.Path]::Combine($PSScriptRoot, 'common.ps1'))
 
 Describe "Get-TokenUser" {
     BeforeAll {
+        . ([IO.Path]::Combine($PSScriptRoot, 'common.ps1'))
+
         $currentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
         $currentAccount = $currentSid.Translate([Security.Principal.NTAccount])
 
@@ -13,19 +12,7 @@ Describe "Get-TokenUser" {
             $null
         )
         $systemAccount = $systemSid.Translate([Security.Principal.NTAccount])
-        $systemPid = Get-Process -IncludeUserName | Where-Object {
-            if ($_.UserName -ne $systemAccount.Value) {
-                return $false
-            }
-
-            try {
-                $null = Get-ProcessToken -ProcessId $_.Id -ErrorAction Stop
-                return $true
-            }
-            catch {
-                return $false
-            }
-        } | Select-Object -First 1 -ExpandProperty Id
+        $systemPid = Get-ProcessForUser -UserName $systemAccount.Value | Select-Object -First 1 -ExpandProperty Id
     }
 
     Context "Current user" {
@@ -75,11 +62,45 @@ Describe "Get-TokenUser" {
             $actual.Count | Should -Be 2
             $actual[0] | Should -Be $currentSid
             $actual[1] | Should -Be $systemSid
+
+            $actual = [PSCustomObject]@{ProcessId = $pid}, [PSCustomObject]@{Id = $systemPid} | Get-TokenUser
+
+            $actual.Count | Should -Be 2
+            $actual[0] | Should -Be $currentAccount
+            $actual[1] | Should -Be $systemAccount
+        }
+
+        It "Fails with invalid process id" {
+            $out = Get-TokenUser -ProcessId 99999 -ErrorVariable err -ErrorAction SilentlyContinue
+
+            $out | Should -Be $null
+            $err.Count | Should -Be 1
+            [string]$err | Should -BeLike "Failed to open process 99999*"
         }
     }
 
     Context "ThreadId" {
+        It "With impersonation" {
+            Enter-TokenContext -ProcessId $systemPid
+            try {
+                $actual = Get-TokenUser -ThreadId (Get-CurrentThreadId)
+
+                $actual | Should -Be $systemAccount
+            }
+            finally {
+                Exit-TokenContext
+            }
+        }
+
         It "Fails without token on thread" {
+            $out = Get-TokenUser -ThreadId (Get-CurrentThreadId) -ErrorVariable err -ErrorAction SilentlyContinue
+
+            $out | Should -Be $null
+            $err.Count | Should -Be 1
+            [string]$err | Should -BeLike "Failed to open thread*token that does not exist*"
+        }
+
+        It "Fails with invalid thread id" {
             $out = Get-TokenUser -ThreadId 99999 -ErrorVariable err -ErrorAction SilentlyContinue
 
             $out | Should -Be $null
@@ -89,6 +110,44 @@ Describe "Get-TokenUser" {
     }
 
     Context "Handle" {
+        It "With parameter" {
+            $token = Get-ProcessToken -ProcessId $systemPid
+            try {
+                $actual = Get-TokenUser -Token $token
 
+                $actual | Should -Be $systemAccount
+            }
+            finally {
+                $token.Dispose()
+            }
+        }
+
+        It "With pipeline input" {
+            $token = Get-ProcessToken
+            try {
+                $actual = $token | Get-TokenUser
+                $actual | Should -Be $currentAccount
+
+                $actual = [PSCustomObject]@{Token = $token} | Get-TokenUser
+                $actual | Should -Be $currentAccount
+            }
+            finally {
+                $token.Dispose()
+            }
+        }
+
+        It "Fails with invalid access" {
+            $token = Get-ProcessToken -Access Duplicate
+            try {
+                $out = Get-TokenUser -Token $token -ErrorVariable err -ErrorAction SilentlyContinue
+
+                $out | Should -Be $null
+                $err.Count | Should -Be 1
+                [string]$err | Should -BeLike "Failed to get token information*Access is denied*"
+            }
+            finally {
+                $token.Dispose()
+            }
+        }
     }
 }

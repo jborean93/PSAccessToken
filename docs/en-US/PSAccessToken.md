@@ -1,7 +1,7 @@
 ---
 Module Name: PSAccessToken
 Module Guid: 5a1d20a4-bd69-4842-a9a5-1d4222dbc573
-Download Help Link:
+Download Help Link: 
 Help Version: 1.0.0
 Locale: en-US
 ---
@@ -37,6 +37,12 @@ Get a handle to the current thread of the thread specified.
 
 ### [Get-ThreadToken](Get-ThreadToken.md)
 Gets the access token associated with a thread.
+
+### [Get-TokenImpersonationLevel](Get-TokenImpersonationLevel.md)
+{{ Fill in the Synopsis }}
+
+### [Get-TokenType](Get-TokenType.md)
+{{ Fill in the Synopsis }}
 
 ### [Get-TokenUser](Get-TokenUser.md)
 Get the user associated with an access token.

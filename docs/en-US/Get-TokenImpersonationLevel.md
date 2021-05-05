@@ -5,62 +5,46 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-TokenUser
+# Get-TokenImpersonationLevel
 
 ## SYNOPSIS
-Get the user associated with an access token.
+Get the impersonation level associated with an access token.
 
 ## SYNTAX
 
 ### CurrentIdentity (Default)
 ```
-Get-TokenUser [-IdentityType <Type>] [-UseProcessToken] [<CommonParameters>]
+Get-TokenImpersonationLevel [-UseProcessToken] [<CommonParameters>]
 ```
 
 ### Token
 ```
-Get-TokenUser [-IdentityType <Type>] [-Token] <SafeHandle[]> [<CommonParameters>]
+Get-TokenImpersonationLevel [-Token] <SafeHandle[]> [<CommonParameters>]
 ```
 
 ### Process
 ```
-Get-TokenUser [-IdentityType <Type>] [-ProcessId] <Int32[]> [<CommonParameters>]
+Get-TokenImpersonationLevel [-ProcessId] <Int32[]> [<CommonParameters>]
 ```
 
 ### Thread
 ```
-Get-TokenUser [-IdentityType <Type>] -ThreadId <Int32[]> [-OpenAsSelf] [<CommonParameters>]
+Get-TokenImpersonationLevel -ThreadId <Int32[]> [-OpenAsSelf] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Get the `TokenUser` associated with an access token.
+Get the `TokenImpersonationLevel` associated with an access token.
 
 ## EXAMPLES
 
-### Get the username of the current security context
+### Get the impersonation level of the current security context
 ```powershell
-PS C:\> Get-TokenUser
+PS C:\> Get-TokenImpersonationLevel
 ```
 
-Gets the NTAccount of the current security context.
+Gets the impersonation level of the current security context.
 
 ## PARAMETERS
-
-### -IdentityType
-The output identity type to use when outputting the username.
-Defaults to `[Security.Principal.NTAccount]` but can also be `[Security.Principal.SecurityIdentifier]` to get the SID.
-
-```yaml
-Type: Type
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -OpenAsSelf
 Will open the thread id specified using the process level security context instead of the thread level context.
@@ -78,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProcessId
-Gets the token user for the process specified.
+Gets the token impersonation level for the process specified.
 
 ```yaml
 Type: Int32[]
@@ -93,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -ThreadId
-Gets the token user for the thread specified.
+Gets the token impersonation level for the thread specified.
 The thread must be impersonating a token for this to be valid.
 
 ```yaml
@@ -109,7 +93,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
-Gets the token user for the token handle specified.
+Gets the token impersonation level for the token handle specified.
 This can be a process or thread token already retrieved or created.
 
 ```yaml
@@ -125,7 +109,7 @@ Accept wildcard characters: False
 ```
 
 ### -UseProcessToken
-Get the token user for the current process security context rather than the current thread impersonation context.
+Get the token impersonation level for the current process security context rather than the current thread impersonation context.
 
 ```yaml
 Type: SwitchParameter
@@ -145,16 +129,16 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Runtime.InteropServices.SafeHandle[]
-The process or token handle(s) to get the token user for.
+The process or token handle(s) to get the token impersonation level for.
 
 ### System.Int32[]
-The process id(s) to get the token user for.
+The process id(s) to get the token impersonation level for.
 
 ## OUTPUTS
 
-### System.Security.Principal.IdentityReference
-The token user as an IdentityReference.
-The output type defaults to `NTAccount` but can be specified with `-IdentityType`
+### System.Security.Principal.TokenImpersonationLevel
+The token impersonation level.
+A primary token will have a level of `None`.
 
 ## NOTES
 
@@ -162,3 +146,4 @@ The output type defaults to `NTAccount` but can be specified with `-IdentityType
 
 [GetTokenInformation](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation)
 [TOKEN_INFORMATION_CLASS](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class)
+[SECURITY_IMPERSONATION_LEVEL](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-security_impersonation_level)

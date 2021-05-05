@@ -76,6 +76,8 @@ CmdletsToExport = @(
     'Get-ProcessToken'
     'Get-ThreadHandle'
     'Get-ThreadToken'
+    'Get-TokenImpersonationLevel'
+    'Get-TokenType'
     'Get-TokenUser'
     'Enter-TokenContext'
     'Exit-TokenContext'

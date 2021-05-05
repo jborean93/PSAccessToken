@@ -14,6 +14,7 @@ namespace PSAccessToken
         ERROR_INVALID_PARAMETER = 0x00000057,
         ERROR_INSUFFICIENT_BUFFER = 0x0000007A,
         ERROR_NO_TOKEN = 0x000003F0,
+        ERROR_CANT_OPEN_ANONYMOUS = 0x00000543,
     }
 
     public class NativeException : Win32Exception
@@ -46,6 +47,7 @@ namespace PSAccessToken
             switch (exception.NativeErrorCode)
             {
                 case (int)Win32ErrorCode.ERROR_ACCESS_DENIED:
+                case (int)Win32ErrorCode.ERROR_CANT_OPEN_ANONYMOUS:
                     category = ErrorCategory.PermissionDenied;
                     break;
 

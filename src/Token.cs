@@ -18,12 +18,13 @@ namespace PSAccessToken
         );
 
         public static SafeNativeHandle DuplicateTokenEx(SafeHandle token, TokenAccessRights access,
-            SecurityAttributes attributes, SecurityImpersonationLevel impersonationLevel, TokenType tokenType)
+            SecurityAttributes attributes, TokenImpersonationLevel impersonationLevel, TokenType tokenType)
         {
+            SecurityImpersonationLevel nativeImpLevel = TokenInfo.CreateImpLevelFromNet(impersonationLevel);
             using (SafeHandle secAttr = NativeHelpers.SECURITY_ATTRIBUTES.CreateBuffer(attributes))
             {
                 SafeNativeHandle handle;
-                if (!NativeDuplicateTokenEx(token, access, secAttr, impersonationLevel, tokenType, out handle))
+                if (!NativeDuplicateTokenEx(token, access, secAttr, nativeImpLevel, tokenType, out handle))
                     throw new NativeException("DuplicateTokenEx");
 
                 return handle;
@@ -131,7 +132,8 @@ namespace PSAccessToken
             : base(identityReference, (int)accessMask, isInherited, inheritanceFlags, propagationFlags, type) { }
     }
 
-    public enum SecurityImpersonationLevel : uint
+    // TokenImpersonationLevel is the publicly exposed enum for this as it includes None.
+    internal enum SecurityImpersonationLevel : uint
     {
         Anonymous = 0,
         Identification = 1,

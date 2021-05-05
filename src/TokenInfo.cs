@@ -150,5 +150,57 @@ namespace PSAccessToken
                 return new SecurityIdentifier(tokenUser.User.Sid);
             }
         }
+
+        public static TokenType GetTokenType(SafeHandle token)
+        {
+            using (SafeMemoryBuffer buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.Type))
+            {
+                byte[] data = new byte[4];
+                Marshal.Copy(buffer.DangerousGetHandle(), data, 0, data.Length);
+                UInt32 val = BitConverter.ToUInt32(data, 0);
+
+                return (TokenType)val;
+            }
+        }
+
+        public static TokenImpersonationLevel GetImpersonationLevel(SafeHandle token)
+        {
+            SafeMemoryBuffer buffer;
+            try
+            {
+                buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.ImpersonationLevel);
+            }
+            catch (NativeException e)
+            {
+                if (e.NativeErrorCode != (int)Win32ErrorCode.ERROR_INVALID_PARAMETER)
+                    throw;
+
+                return TokenImpersonationLevel.None;
+            }
+
+
+            using (buffer) {
+                byte[] data = new byte[4];
+                Marshal.Copy(buffer.DangerousGetHandle(), data, 0, data.Length);
+                SecurityImpersonationLevel val = (SecurityImpersonationLevel)BitConverter.ToUInt32(data, 0);
+
+                return CreateImpLevelFromNative(val);
+            }
+        }
+
+        internal static TokenImpersonationLevel CreateImpLevelFromNative(SecurityImpersonationLevel level)
+        {
+            // The .NET enum has 1 extra value starting at 0 (None) so we just need to add 1 to convert.
+            return (TokenImpersonationLevel)((int)level + 1);
+        }
+
+        internal static SecurityImpersonationLevel CreateImpLevelFromNet(TokenImpersonationLevel level)
+        {
+            // The Native enum doesn't have None and start at 0, handle that case (make it Anonymous) and subtract 1.
+            if (level == TokenImpersonationLevel.None)
+                level = TokenImpersonationLevel.Anonymous;
+
+            return (SecurityImpersonationLevel)((UInt32)level - 1);
+        }
     }
 }

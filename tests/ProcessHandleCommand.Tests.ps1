@@ -1,7 +1,4 @@
-$moduleName   = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '..', 'module', '*.psd1'))).BaseName
-$manifestPath = [IO.Path]::Combine($PSScriptRoot, '..', 'output', $moduleName)
-
-Import-Module $manifestPath
+. ([IO.Path]::Combine($PSScriptRoot, 'common.ps1'))
 
 Describe "Get-ProcessHandle" {
     Context "Current process" {

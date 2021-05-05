@@ -14,7 +14,7 @@
                 "-NoExit",
                 "-NoProfile",
                 "-Command",
-                "Import-Module ./build/PSAccessToken"
+                "Import-Module ./output/PSAccessToken"
             ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

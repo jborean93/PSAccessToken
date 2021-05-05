@@ -2,6 +2,7 @@ using System;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace PSAccessToken
 {
@@ -31,7 +32,7 @@ namespace PSAccessToken
         public NativeObjectSecurity SecurityDescriptor { get; set; }
 
         [Parameter()]
-        public SecurityImpersonationLevel ImpersonationLevel { get; set; } = SecurityImpersonationLevel.Impersonation;
+        public TokenImpersonationLevel ImpersonationLevel { get; set; }
 
         [Parameter()]
         public TokenType TokenType { get; set; } = TokenType.Primary;
@@ -43,10 +44,39 @@ namespace PSAccessToken
                 InheritHandle = Inherit,
                 SecurityDescriptor = SecurityDescriptor,
             };
+
+            if (!MyInvocation.BoundParameters.ContainsKey("ImpersonationLevel"))
+            {
+                if (TokenType == TokenType.Primary)
+                    ImpersonationLevel = TokenImpersonationLevel.None;
+                else
+                    ImpersonationLevel = TokenImpersonationLevel.Impersonation;
+            }
         }
 
         protected override void ProcessRecord()
         {
+            if (TokenType == TokenType.Impersonation && ImpersonationLevel == TokenImpersonationLevel.None)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("Cannot create an Impersonation token with the None impersonation level"),
+                    String.Format("Copy-Token.{0}", nameof(ArgumentException)),
+                    ErrorCategory.InvalidArgument,
+                    null
+                ));
+                return;
+            }
+            else if (TokenType == TokenType.Primary && ImpersonationLevel != TokenImpersonationLevel.None)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("Cannot create a Primary token with any impersonation level other than None"),
+                    String.Format("Copy-Token.{0}", nameof(ArgumentException)),
+                    ErrorCategory.InvalidArgument,
+                    null
+                ));
+                return;
+            }
+
             foreach (SafeHandle t in Token)
             {
                 try
