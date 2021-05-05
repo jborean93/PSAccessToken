@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <AssemblyName>PSAccessToken</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
 
     <!--Used in test build scripts-->
     <PSWinFramework>net472</PSWinFramework>

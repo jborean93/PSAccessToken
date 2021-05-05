@@ -28,7 +28,7 @@ namespace PSAccessToken
             ValueFromPipelineByPropertyName = true
         )]
         [Alias("Id")]
-        public Int32[] ThreadId { get; set; }
+        public Int32[]? ThreadId { get; set; }
 
         [Parameter(
             Position = 1,

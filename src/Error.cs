@@ -31,7 +31,7 @@ namespace PSAccessToken
     internal class ErrorHelper
     {
         public static ErrorRecord GenerateWin32Error(NativeException exception, string message,
-            object targetObject = null)
+            object? targetObject = null)
         {
             string errorId = exception.Function + ",";
             try

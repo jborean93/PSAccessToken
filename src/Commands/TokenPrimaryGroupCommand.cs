@@ -6,11 +6,11 @@ using System.Security.Principal;
 namespace PSAccessToken
 {
     [Cmdlet(
-        VerbsCommon.Get, "TokenUser",
+        VerbsCommon.Get, "TokenPrimaryGroup",
         DefaultParameterSetName = TokenInfoBaseCommand.DefaultParameterSetName
     )]
     [OutputType(typeof(IdentityReference))]
-    public class TokenUserCommand : TokenInfoBaseCommand
+    public class TokenPrimaryGroupCommand : TokenInfoBaseCommand
     {
         [Parameter()]
         [ValidateIdentityType()]
@@ -18,7 +18,7 @@ namespace PSAccessToken
 
         protected override void TokenOperation(SafeHandle token)
         {
-            SecurityIdentifier sid = TokenInfo.GetUser(token);
+            SecurityIdentifier sid = TokenInfo.GetPrimaryGroup(token);
             WriteIdentityReference(sid, IdentityType);
         }
     }

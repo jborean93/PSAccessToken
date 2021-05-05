@@ -12,7 +12,7 @@ namespace PSAccessToken
     [OutputType(typeof(SafeHandle))]
     public class CopyTokenCommand : PSCmdlet
     {
-        private SecurityAttributes _attributes = null;
+        private SecurityAttributes? _attributes = null;
 
         [Parameter(
             Mandatory = true,
@@ -20,7 +20,7 @@ namespace PSAccessToken
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true
         )]
-        public SafeHandle[] Token { get; set; }
+        public SafeHandle[]? Token { get; set; }
 
         [Parameter()]
         public TokenAccessRights Access { get; set; }
@@ -29,7 +29,7 @@ namespace PSAccessToken
         public SwitchParameter Inherit { get; set; }
 
         [Parameter()]
-        public NativeObjectSecurity SecurityDescriptor { get; set; }
+        public NativeObjectSecurity? SecurityDescriptor { get; set; }
 
         [Parameter()]
         public TokenImpersonationLevel ImpersonationLevel { get; set; }
@@ -77,7 +77,7 @@ namespace PSAccessToken
                 return;
             }
 
-            foreach (SafeHandle t in Token)
+            foreach (SafeHandle t in Token ?? Array.Empty<SafeHandle>())
             {
                 try
                 {

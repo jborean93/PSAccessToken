@@ -34,7 +34,7 @@ namespace PSAccessToken
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "Token"
         )]
-        public SafeHandle[] Token { get; set; }
+        public SafeHandle[]? Token { get; set; }
 
         [Parameter(
             Position = 0,
@@ -44,14 +44,14 @@ namespace PSAccessToken
             ParameterSetName = "Process"
         )]
         [Alias("Id")]
-        public Int32[] ProcessId { get; set; }
+        public Int32[]? ProcessId { get; set; }
 
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "Thread"
         )]
-        public Int32[] ThreadId { get; set; }
+        public Int32[]? ThreadId { get; set; }
 
         [Parameter(
             ParameterSetName = "Thread"
@@ -71,17 +71,17 @@ namespace PSAccessToken
             }
             else if (this.ParameterSetName == "Process")
             {
-                foreach (Int32 pid in ProcessId)
+                foreach (Int32 pid in ProcessId ?? Array.Empty<Int32>())
                     ProcessHandleOperation(pid);
             }
             else if (this.ParameterSetName == "Thread")
             {
-                foreach (Int32 tid in ThreadId)
+                foreach (Int32 tid in ThreadId ?? Array.Empty<Int32>())
                     ThreadHandleOperation(tid);
             }
             else
             {
-                foreach (SafeHandle t in Token)
+                foreach (SafeHandle t in Token ?? Array.Empty<SafeHandle>())
                     WrapTokenOperation(t);
             }
         }
@@ -161,6 +161,23 @@ namespace PSAccessToken
             catch (NativeException e)
             {
                 WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to open current identity"));
+            }
+        }
+
+        protected void WriteIdentityReference(IdentityReference value, Type outputType)
+        {
+            try
+            {
+                WriteObject(value.Translate(outputType));
+            }
+            catch (IdentityNotMappedException e)
+            {
+                ErrorRecord err = new ErrorRecord(e, String.Format("{0}.{1}", MyInvocation.MyCommand.Name, nameof(e)),
+                    ErrorCategory.InvalidType, value);
+                err.ErrorDetails = new ErrorDetails(String.Format("Failed to translate {0} to {1}: {2}",
+                    value.Value, outputType.Name, e.Message));
+
+                WriteError(err);
             }
         }
     }

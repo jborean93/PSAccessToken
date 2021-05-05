@@ -19,10 +19,10 @@ namespace PSAccessToken
                 nLength = (UInt32)Marshal.SizeOf(this);
             }
 
-            public static SafeMemoryBuffer CreateBuffer(SecurityAttributes attr)
+            public static SafeMemoryBuffer CreateBuffer(SecurityAttributes? attr)
             {
                 if (attr == null)
-                    return new SafeMemoryBuffer(IntPtr.Zero);
+                    return SafeMemoryBuffer.NullBuffer;
 
                 byte[] secDesc = new byte[0];
                 if (attr.SecurityDescriptor != null)
@@ -56,10 +56,18 @@ namespace PSAccessToken
         }
     }
 
+    internal class PrincipalHelper
+    {
+        public static IdentityReference Translate(IdentityReference identity, Type identityType)
+        {
+            return identity.Translate(identityType);
+        }
+    }
+
     public class SecurityAttributes
     {
         public bool InheritHandle { get; set; }
-        public NativeObjectSecurity SecurityDescriptor { get; set; }
+        public NativeObjectSecurity? SecurityDescriptor { get; set; }
     }
 
     public abstract class NativeSecurity<TRight, TRule> : NativeObjectSecurity
@@ -73,14 +81,6 @@ namespace PSAccessToken
         protected NativeSecurity(ResourceType resourceType, SafeHandle handle,
             AccessControlSections includeSections)
             : base(false, resourceType, handle, includeSections) { }
-
-        public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask,
-            bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags,
-            AccessControlType type)
-        {
-            return (TRule)Activator.CreateInstance(typeof(TRule), identityReference, (TRight)(object)accessMask,
-                isInherited, inheritanceFlags, propagationFlags, type);
-        }
 
         public new void AddAccessRule(AccessRule rule) { base.AddAccessRule(rule); }
 

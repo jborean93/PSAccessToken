@@ -56,7 +56,12 @@ task BuildManaged {
     )
     try {
         foreach ($framework in $TargetFrameworks) {
+            Write-Host "Compiling for $framework"
             dotnet @arguments --framework $framework
+
+            if ($LASTEXITCODE) {
+                throw "Failed to compiled code for $framework"
+            }
         }
     }
     finally {

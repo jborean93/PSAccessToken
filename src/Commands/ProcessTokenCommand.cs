@@ -18,7 +18,7 @@ namespace PSAccessToken
             ParameterSetName = "Id"
         )]
         [Alias("Id")]
-        public Int32[] ProcessId { get; set; }
+        public Int32[]? ProcessId { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -28,7 +28,7 @@ namespace PSAccessToken
             ParameterSetName = "Handle"
         )]
         [Alias("SafeHandle")]
-        public SafeHandle[] Process { get; set; }
+        public SafeHandle[]? Process { get; set; }
 
         [Parameter(
             Position = 1,
@@ -58,7 +58,7 @@ namespace PSAccessToken
             }
             else
             {
-                foreach (SafeHandle handle in Process)
+                foreach (SafeHandle handle in Process ?? Array.Empty<SafeHandle>())
                 {
                     try
                     {

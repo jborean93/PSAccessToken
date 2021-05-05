@@ -16,7 +16,7 @@ namespace PSAccessToken
             ValueFromPipelineByPropertyName = true
         )]
         [Alias("Id")]
-        public Int32[] ProcessId { get; set; }
+        public Int32[]? ProcessId { get; set; }
 
         [Parameter(
             Position = 1,

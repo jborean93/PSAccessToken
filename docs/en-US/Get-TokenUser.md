@@ -162,3 +162,4 @@ The output type defaults to `NTAccount` but can be specified with `-IdentityType
 
 [GetTokenInformation](https://docs.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation)
 [TOKEN_INFORMATION_CLASS](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-token_information_class)
+[TOKEN_USER](https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-token_user)

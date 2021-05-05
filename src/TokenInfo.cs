@@ -1,6 +1,7 @@
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Security.Principal;
 
 namespace PSAccessToken
@@ -12,6 +13,24 @@ namespace PSAccessToken
         {
             public IntPtr Sid;
             public TokenGroupAttributes Attributes;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TOKEN_DEFAULT_DACL
+        {
+            public IntPtr DefaultDacl;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TOKEN_OWNER
+        {
+            public IntPtr Owner;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TOKEN_PRIMARY_GROUP
+        {
+            public IntPtr PrimaryGroup;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -34,13 +53,12 @@ namespace PSAccessToken
 
         public static SafeMemoryBuffer GetTokenInformation(SafeHandle handle, TokenInformationClass infoClass)
         {
-            int bufferSize = 0;
             SafeMemoryBuffer buffer = SafeMemoryBuffer.NullBuffer;
 
             while (true)
             {
                 int returnLength;
-                if (NativeGetTokenInformation(handle, infoClass, buffer, bufferSize, out returnLength))
+                if (NativeGetTokenInformation(handle, infoClass, buffer, buffer.Length, out returnLength))
                     return buffer;
 
                 int errCode = Marshal.GetLastWin32Error();
@@ -52,21 +70,23 @@ namespace PSAccessToken
                 }
 
                 buffer = new SafeMemoryBuffer(returnLength);
-                bufferSize = returnLength;
             }
         }
     }
 
     internal class SafeMemoryBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public static readonly SafeMemoryBuffer NullBuffer = new SafeMemoryBuffer(IntPtr.Zero, false);
+        public static readonly SafeMemoryBuffer NullBuffer = new SafeMemoryBuffer(IntPtr.Zero, 0, false);
 
-        public SafeMemoryBuffer(int cb) : this(Marshal.AllocHGlobal(cb)) { }
+        public Int32 Length { get; }
 
-        public SafeMemoryBuffer(IntPtr handle) : this(handle, true) { }
+        public SafeMemoryBuffer(int cb) : this(Marshal.AllocHGlobal(cb), cb) { }
 
-        public SafeMemoryBuffer(IntPtr handle, bool ownsHandle) : base(ownsHandle)
+        public SafeMemoryBuffer(IntPtr handle, int length) : this(handle, length, true) { }
+
+        public SafeMemoryBuffer(IntPtr handle, int length, bool ownsHandle) : base(ownsHandle)
         {
+            Length = length;
             base.SetHandle(handle);
         }
 
@@ -155,7 +175,7 @@ namespace PSAccessToken
     {
         public static SecurityIdentifier GetUser(SafeHandle token)
         {
-            using (SafeMemoryBuffer buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.User))
+            using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.User))
             {
                 var tokenUser = Marshal.PtrToStructure<NativeHelpers.TOKEN_USER>(buffer.DangerousGetHandle());
 
@@ -163,9 +183,46 @@ namespace PSAccessToken
             }
         }
 
+        public static SecurityIdentifier GetOwner(SafeHandle token)
+        {
+            using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.Owner))
+            {
+                var tokenOwner = Marshal.PtrToStructure<NativeHelpers.TOKEN_OWNER>(buffer.DangerousGetHandle());
+
+                return new SecurityIdentifier(tokenOwner.Owner);
+            }
+        }
+
+        public static SecurityIdentifier GetPrimaryGroup(SafeHandle token)
+        {
+            using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.PrimaryGroup))
+            {
+                var tokenOwner = Marshal.PtrToStructure<NativeHelpers.TOKEN_PRIMARY_GROUP>(
+                    buffer.DangerousGetHandle());
+
+                return new SecurityIdentifier(tokenOwner.PrimaryGroup);
+            }
+        }
+
+        public static RawAcl? GetDefaultDacl(SafeHandle token)
+        {
+            using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.DefaultDacl))
+            {
+                var tokenDefaultDacl = Marshal.PtrToStructure<NativeHelpers.TOKEN_DEFAULT_DACL>(
+                    buffer.DangerousGetHandle());
+
+                if (tokenDefaultDacl.DefaultDacl == IntPtr.Zero)
+                    return null;
+
+                byte[] data = new byte[buffer.Length];
+                Marshal.Copy(tokenDefaultDacl.DefaultDacl, data, 0, data.Length);
+                return new RawAcl(data, 0);
+            }
+        }
+
         public static TokenType GetTokenType(SafeHandle token)
         {
-            using (SafeMemoryBuffer buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.Type))
+            using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.Type))
             {
                 byte[] data = new byte[4];
                 Marshal.Copy(buffer.DangerousGetHandle(), data, 0, data.Length);

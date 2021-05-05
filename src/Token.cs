@@ -18,7 +18,7 @@ namespace PSAccessToken
         );
 
         public static SafeNativeHandle DuplicateTokenEx(SafeHandle token, TokenAccessRights access,
-            SecurityAttributes attributes, TokenImpersonationLevel impersonationLevel, TokenType tokenType)
+            SecurityAttributes? attributes, TokenImpersonationLevel impersonationLevel, TokenType tokenType)
         {
             SecurityImpersonationLevel nativeImpLevel = TokenInfo.CreateImpLevelFromNet(impersonationLevel);
             using (SafeHandle secAttr = NativeHelpers.SECURITY_ATTRIBUTES.CreateBuffer(attributes))
@@ -121,6 +121,14 @@ namespace PSAccessToken
 
         public TokenSecurity(SafeHandle handle, AccessControlSections includeSections)
             : base(ResourceType.KernelObject, handle, includeSections) { }
+
+        public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask,
+            bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags,
+            AccessControlType type)
+        {
+            return new TokenAccessRule(identityReference, (TokenAccessRights)accessMask,
+                isInherited, inheritanceFlags, propagationFlags, type);
+        }
     }
 
     public class TokenAccessRule : AccessRule

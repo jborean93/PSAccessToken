@@ -16,11 +16,11 @@ namespace PSAccessToken
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true
         )]
-        public SafeHandle[] Handle { get; set; }
+        public SafeHandle[]? Handle { get; set; }
 
         protected override void ProcessRecord()
         {
-            foreach (SafeHandle h in Handle)
+            foreach (SafeHandle h in Handle ?? Array.Empty<SafeHandle>())
             {
                 try
                 {
@@ -47,7 +47,7 @@ namespace PSAccessToken
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true
         )]
-        public SafeHandle[] Handle { get; set; }
+        public SafeHandle[]? Handle { get; set; }
 
         [Parameter()]
         public SwitchParameter Inherit { get; set; }
@@ -81,7 +81,7 @@ namespace PSAccessToken
 
         protected override void ProcessRecord()
         {
-            foreach (SafeHandle h in Handle)
+            foreach (SafeHandle h in Handle ?? Array.Empty<SafeHandle>())
             {
                 try
                 {

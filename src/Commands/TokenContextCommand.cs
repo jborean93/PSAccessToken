@@ -7,8 +7,8 @@ namespace PSAccessToken
 {
     public static class ImpersonationState
     {
-        public static String OriginalPrompt { get; internal set; }
-        public static String Username { get; internal set; }
+        public static String? OriginalPrompt { get; internal set; }
+        public static String? Username { get; internal set; }
 
         internal static void SetFunction(ProviderIntrinsics provider, string name, ScriptBlock code)
         {
@@ -38,6 +38,7 @@ namespace PSAccessToken
         public Int32 ProcessId { get; set; }
 
         [Parameter(
+            Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "Thread"
         )]
@@ -49,12 +50,13 @@ namespace PSAccessToken
         public SwitchParameter OpenAsSelf { get; set; }
 
         [Parameter(
+            Mandatory = true,
             Position = 0,
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "Token"
         )]
-        public SafeHandle Token { get; set; }
+        public SafeHandle? Token { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -72,16 +74,20 @@ namespace PSAccessToken
             TokenAccessRights access = TokenAccessRights.Query |
                 TokenAccessRights.Duplicate |
                 TokenAccessRights.Impersonate;
-            bool cleanup = true;
 
+            SafeHandle tokenToProcess;
             try
             {
-                if (this.ParameterSetName == "Process")
-                    Token = NativeMethods.OpenProcessToken(ProcessId, access);
-                else if (this.ParameterSetName == "Thread")
-                    Token = NativeMethods.OpenThreadToken(ThreadId, access, OpenAsSelf);
+                if (Token == null)
+                {
+                    if (this.ParameterSetName == "Process")
+                        tokenToProcess = NativeMethods.OpenProcessToken(ProcessId, access);
+                    else
+                        tokenToProcess = NativeMethods.OpenThreadToken(ThreadId, access, OpenAsSelf);
+                }
                 else
-                    cleanup = false;
+                    // We don't want to clean this up as we don't own it
+                    tokenToProcess = new SafeNativeHandle(Token.DangerousGetHandle(), false, true);
             }
             catch (NativeException e)
             {
@@ -89,21 +95,19 @@ namespace PSAccessToken
                 return;
             }
 
-            try
+            using (tokenToProcess)
             {
-                ImpersonationState.Username = GetTokenUser(Token);
-                NativeMethods.ImpersonateLoggedOnUser(Token);
-            }
-            catch (NativeException e)
-            {
-                WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to impersonate token",
-                    (Int64)Token.DangerousGetHandle()));
-                return;
-            }
-            finally
-            {
-                if (cleanup)
-                    Token.Dispose();
+                try
+                {
+                    ImpersonationState.Username = GetTokenUser(tokenToProcess);
+                    NativeMethods.ImpersonateLoggedOnUser(tokenToProcess);
+                }
+                catch (NativeException e)
+                {
+                    WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to impersonate token",
+                        (Int64)tokenToProcess.DangerousGetHandle()));
+                    return;
+                }
             }
 
             ImpersonationState.OriginalPrompt = ((FunctionInfo)(InvokeProvider.Item.Get(
@@ -121,7 +125,7 @@ namespace PSAccessToken
 
         private string GetTokenUser(SafeHandle token)
         {
-            SecurityIdentifier sid = TokenInfo.GetUser(Token);
+            SecurityIdentifier sid = TokenInfo.GetUser(token);
 
             try
             {
