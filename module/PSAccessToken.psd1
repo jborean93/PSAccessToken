@@ -14,7 +14,7 @@
 RootModule = 'PSAccessToken.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.1.0'
+ModuleVersion = '0.2.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -38,7 +38,7 @@ Description = 'Manages a Windows access token.`nSee https://github.com/jborean93
 PowerShellVersion = '5.1'
 
 # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-DotNetFrameworkVersion = '4.7.1'
+DotNetFrameworkVersion = '4.7.2'
 
 # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
 ClrVersion = '4.0'
@@ -62,18 +62,32 @@ ClrVersion = '4.0'
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-NestedModules = @('bin\PSAccessToken.dll')
+NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @(
+    'Copy-Token'
+    'Enter-TokenContext'
+    'Exit-TokenContext'
+    'Get-CurrentThreadId'
     'Get-HandleInformation'
     'Get-ProcessHandle'
     'Get-ProcessToken'
     'Get-ThreadHandle'
+    'Get-ThreadToken'
+    'Get-TokenDefaultDacl'
+    'Get-TokenImpersonationLevel'
+    'Get-TokenOwner'
+    'Get-TokenPrimaryGroup'
+    'Get-TokenSecurity'
+    'Get-TokenType'
+    'Get-TokenUser'
+    'New-TokenSecurity'
     'Set-HandleInformation'
+    'Set-TokenSecurity'
 )
 
 # Variables to export from this module

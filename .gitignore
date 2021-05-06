@@ -362,7 +362,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 ### Custom entries ###
-build/
+output/
 tools/*
-!tools/ProcessRunspace.ps1
+!tools/PesterTest.ps1
 

@@ -1,6 +1,22 @@
 # Changelog for PInvokeHelper
 
+## v0.2.0 - TBD
 
-## v0.0.1 - 2021-05-01
+* Changed `Open-ProcessToken` to `Get-ProcessToken`
+* Added the following cmdlet:
+  * [Copy-Token](docs/en-US/Copy-Token.md) - Copies an access token with new impersonation or type
+  * [Enter-TokenContext](docs/en-US/Enter-TokenContext.md) - Sets the thread security context to the token specified
+  * [Exit-TokenContext](docs/en-US/Exit-TokenContext.md) - Exits the thread security context that has been entered
+  * [Get-CurrentThreadId](docs/en-US/Get-CurrentThreadId.md) - Gets the Thread ID of the current thread
+  * [Get-ThreadToken](docs/en-US/Get-ThreadToken.md) - Gets the access token for the thread specified
+  * [Get-TokenDefaultDacl](docs/en-US/Get-TokenDefaultDacl.md) - Gets the default discretionary access control list (DACL) of the token specified
+  * [Get-TokenOwner](docs/en-US/Get-TokenOwner.md) - Gets the owner of the token specified
+  * [Get-TokenPrimaryGroup](docs/en-US/Get-TokenPrimaryGroup.md) - Gets the primary group of the token specified
+  * [Get-TokenType](docs/en-US/Get-TokenType.md) - Gets the type, primary or impersonation, of the token specified
+  * [Get-TokenImpersonationLevel](docs/en-US/Get-TokenImpersonationLevel.md) - Gets the impersonation level of the token specified
+  * [Get-TokenUser](docs/en-US/Get-TokenUser.md) - Gets the username of the token specified
+
+
+## v0.1.0 - 2021-05-01
 
 * Initial version of the `PSAccessToken` module

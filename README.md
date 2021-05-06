@@ -11,9 +11,9 @@ Various cmdlets that can be used to manipulate [Windows Access token](https://do
 Better docs are forthcoming, this is still a work in progress.
 
 
-## Info
+## Documentation
 
-TODO Link to docs
+Documentation for this module and details on the cmdlets included can be found [here](docs/en-US/PSAccessToken.md).
 
 
 ## Requirements
@@ -32,11 +32,11 @@ The easiest way to install this module is through
 You can install this module by running;
 
 ```powershell
-# Install for all users
-Install-Module -Name PSAccessToken
-
 # Install for only the current user
 Install-Module -Name PSAccessToken -Scope CurrentUser
+
+# Install for all users
+Install-Module -Name PSAccessToken -Scope AllUsers
 ```
 
 
@@ -50,5 +50,4 @@ This script will ensure all dependencies are installed before running the test s
 
 ## Backlog
 
-* Expand tests
 * Add way more cmdlets

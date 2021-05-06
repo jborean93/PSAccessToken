@@ -23,7 +23,22 @@
             "type": "shell",
             "args": [
                 "-Command",
-                "Import-Module ${workspaceFolder}/build/PSAccessToken; Import-Module platyPS; Update-MarkdownHelpModule ${workspaceFolder}/docs/en-US -AlphabeticParamsOrder -RefreshModulePage -UpdateInputOutput"
+                "Import-Module ${workspaceFolder}/output/PSAccessToken; Import-Module platyPS; Update-MarkdownHelpModule ${workspaceFolder}/docs/en-US -AlphabeticParamsOrder -RefreshModulePage -UpdateInputOutput"
+            ],
+            "problemMatcher": [],
+            "dependsOn": [
+                "build"
+            ]
+        },
+        {
+            "label": "test",
+            "command": "pwsh",
+            "type": "shell",
+            "args": [
+                "-File",
+                "${workspaceFolder}/build.ps1",
+                "-Task",
+                "Test"
             ],
             "problemMatcher": [],
             "dependsOn": [

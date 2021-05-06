@@ -1,60 +1,71 @@
-using System.ComponentModel;
+using System;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
 {
     [Cmdlet(
-        VerbsCommon.Get, "ThreadHandle",
-        DefaultParameterSetName = "Current"
+        VerbsCommon.Get, "CurrentThreadId"
+    )]
+    [OutputType(typeof(Int32))]
+    public class GetCurrentThreadId : PSCmdlet
+    {
+        protected override void EndProcessing()
+        {
+            WriteObject(NativeMethods.GetCurrentThreadId());
+        }
+    }
+
+    [Cmdlet(
+        VerbsCommon.Get, "ThreadHandle"
     )]
     [OutputType(typeof(SafeHandle))]
     public class GetThreadHandleCommand : PSCmdlet
     {
         [Parameter(
-            ParameterSetName = "Current"
-        )]
-        public SwitchParameter Current { get; set; }
-
-        [Parameter(
-            Mandatory = true,
             Position = 0,
             ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "Explicit"
+            ValueFromPipelineByPropertyName = true
         )]
         [Alias("Id")]
-        public int[] ThreadId { get; set; }
+        public Int32[]? ThreadId { get; set; }
 
         [Parameter(
             Position = 1,
-            ValueFromPipelineByPropertyName = true,
-            ParameterSetName = "Explicit"
+            ValueFromPipelineByPropertyName = true
         )]
         public ThreadAccessRights Access { get; set; } = ThreadAccessRights.QueryInformation;
 
-        [Parameter(
-            ParameterSetName = "Explicit"
-        )]
+        [Parameter()]
         public SwitchParameter Inherit { get; set; }
 
         protected override void ProcessRecord()
         {
-            if (this.ParameterSetName == "Current")
-                WriteObject(NativeMethods.GetCurrentThread());
-            else
+            if (ThreadId == null || ThreadId.Length == 0)
             {
-                foreach (int tid in ThreadId)
+                // If the user wants to inherit the existing token or get explicit access we need to use OpenProcess.
+                if (Inherit || MyInvocation.BoundParameters.ContainsKey("Access"))
+                    ThreadId = new int[] { NativeMethods.GetCurrentThreadId() };
+                else
                 {
-                    try
-                    {
-                        WriteObject(NativeMethods.OpenThread(Access, Inherit, tid));
-                    }
-                    catch (Win32Exception e)
-                    {
-                        WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread handle",
-                            "OpenThread", tid));
-                    }
+                    WriteVerbose("Calling GetCurrentThread()");
+                    WriteObject(NativeMethods.GetCurrentThread());
+                    return;
+                }
+            }
+
+            foreach (int tid in ThreadId)
+            {
+                WriteVerbose(String.Format("Calling OpenThread({0})", tid));
+
+                try
+                {
+                    WriteObject(NativeMethods.OpenThread(Access, Inherit, tid));
+                }
+                catch (NativeException e)
+                {
+                    WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get thread handle",
+                        tid));
                 }
             }
         }

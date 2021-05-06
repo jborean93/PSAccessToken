@@ -1,80 +1,141 @@
-$moduleName   = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '..', 'module', '*.psd1'))).BaseName
-$manifestPath = [IO.Path]::Combine($PSScriptRoot, '..', 'build', $moduleName)
-
-Import-Module $manifestPath
+. ([IO.Path]::Combine($PSScriptRoot, 'common.ps1'))
 
 Describe "Get-ProcessHandle" {
     Context "Current process" {
         It "Has the expected psuedo handle value" {
             $handle = Get-ProcessHandle
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
-        }
-
-        It "-Current always means current process" {
-            $handle = Get-ProcessHandle -Current
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
-
-            $handle = Get-ProcessHandle -Current:$false
-            $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
+            try {
+                $handle.DangerousGetHandle() | Should -Be ([IntPtr]::new(-1))
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Is not invalid" {
             $handle = Get-ProcessHandle
-            $handle.IsInvalid | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Is not closed" {
             $handle = Get-ProcessHandle
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsClosed | Should -Be $false
 
-            $handle.Dispose()
+                $handle.Dispose()
 
-            $handle.IsClosed | Should -be $true
+                $handle.IsClosed | Should -be $true
+            }
+            finally {
+                $handle.Dispose()
+            }
+
+        }
+
+        It "Inherit is not psuedo handle" {
+            $handle = Get-ProcessHandle -Inherit
+            try {
+                $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
+
+                $info = Get-HandleInformation -Handle $handle
+                $info.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
+            }
+            finally {
+                $handle.Dispose()
+            }
+        }
+
+        It "Access is not psuedo handle" {
+            $handle = Get-ProcessHandle -Access QueryInformation
+            try {
+                $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
     }
 
     Context "Explicit process" {
         It "Does not use the psuedo handle" {
             $handle = Get-ProcessHandle -ProcessId $pid
-            $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
+            try {
+                $handle.DangerousGetHandle() | Should -Not -Be ([IntPtr]::new(-1))
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Is not invalid" {
             $handle = Get-ProcessHandle -Id $pid
-            $handle.IsInvalid | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Is not closed" {
             $handle = Get-ProcessHandle -ProcessId $pid
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsClosed | Should -Be $false
 
-            $handle.Dispose()
+                $handle.Dispose()
 
-            $handle.IsClosed | Should -be $true
+                $handle.IsClosed | Should -be $true
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Works with pipeline input" {
             $handle = $pid | Get-ProcessHandle
-
-            $handle.IsInvalid | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Works with array of pids" {
             $handle = Get-ProcessHandle -ProcessId $pid, $pid
-
-            $handle.Count | Should -Be 2
-            $handle[0].IsInvalid | Should -Be $false
-            $handle[1].IsInvalid | Should -Be $false
+            try {
+                $handle.Count | Should -Be 2
+                $handle[0].IsInvalid | Should -Be $false
+                $handle[1].IsInvalid | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Get inheritable handle" {
             $handle = $pid | Get-ProcessHandle
-            $res = Get-HandleInformation -Handle $handle
-            $res.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $false
+            try {
+                $res = Get-HandleInformation -Handle $handle
+                $res.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
 
             $handle = $pid | Get-ProcessHandle -Inherit
-            $res = Get-HandleInformation -Handle $handle
-            $res.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
+            try {
+                $res = Get-HandleInformation -Handle $handle
+                $res.HasFlag([PSAccessToken.HandleFlags]::Inherit) | Should -Be $true
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Error on invalid process id" {

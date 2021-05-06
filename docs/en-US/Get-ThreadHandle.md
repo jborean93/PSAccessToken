@@ -12,21 +12,14 @@ Get a handle to the current thread of the thread specified.
 
 ## SYNTAX
 
-### Current (Default)
 ```
-Get-ThreadHandle [-Current] [<CommonParameters>]
-```
-
-### Explicit
-```
-Get-ThreadHandle [-ThreadId] <Int32[]> [[-Access] <ThreadAccessRights>] [-Inherit] [<CommonParameters>]
+Get-ThreadHandle [[-ThreadId] <Int32[]>] [[-Access] <ThreadAccessRights>] [-Inherit] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 Gets a handle to the current thread of the thread specified.
 This handle can be used for further actions on the thread that was opened.
-When no parameters, or `-Current`, is specified then the handle is a psuedo handle with full access rights to the current thread.
-When `-Id` is specified then it will get the handle to the process with that ID with the access rights specified.
+When no parameters ares specified then the handle is a psuedo handle with full access rights to the current thread.
 
 ## EXAMPLES
 
@@ -56,10 +49,11 @@ Gets the handle to the thread with the TID of 1234 with Impersonate and QueryInf
 ### -Access
 The desired access rights to the thread object.
 The default is `QueryInformation` which allows you to query information about the process.
+If specified without a `ThreadId` then the thread handle is for the current thread with the access specified.
 
 ```yaml
 Type: ThreadAccessRights
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases:
 Accepted values: Terminate, SuspendResume, GetContext, SetContext, SetInformation, QueryInformation, SetThreadToken, Impersonate, DirectImpersonation, SetLimitedInformation, QueryLimitedInformation, Delete, ReadControl, WriteDAC, WriteOwner, StandardRightsRequired, Synchronize, AllAccess, AccessSystemSecurity
 
@@ -70,28 +64,13 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Current
-Gets the handle to the current thread with AllAccess rights and no inheritance.
-This is the default action even when the switch isn't provided and is only used to differenciate between parameter set.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: Current
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Inherit
 The handle can be inherited by any child processes spawned by the caller process.
+When specified without a `ThreadId` then the thread handle is for the current thread that is inheritable.
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases:
 
 Required: False
@@ -106,10 +85,10 @@ The thread ID, or list of, to open the handle for.
 
 ```yaml
 Type: Int32[]
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases: Id
 
-Required: True
+Required: False
 Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)

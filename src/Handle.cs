@@ -1,6 +1,5 @@
 using Microsoft.Win32.SafeHandles;
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
@@ -22,7 +21,7 @@ namespace PSAccessToken
         {
             HandleFlags flags;
             if (!NativeGetHandleInformation(handle, out flags))
-                throw new Win32Exception();
+                throw new NativeException("GetHandleInformation");
 
             return flags;
         }
@@ -37,7 +36,7 @@ namespace PSAccessToken
         public static void SetHandleInformation(SafeHandle handle, HandleFlags mask, HandleFlags flags)
         {
             if (!NativeSetHandleInformation(handle, mask, flags))
-                throw new Win32Exception();
+                throw new NativeException("SetHandleInformation");
         }
     }
 

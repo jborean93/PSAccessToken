@@ -5,34 +5,35 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-ProcessToken
+# Get-ThreadToken
 
 ## SYNOPSIS
-Gets the access token associated with a process.
+Gets the access token associated with a thread.
 
 ## SYNTAX
 
 ### Id (Default)
 ```
-Get-ProcessToken [-ProcessId <Int32[]>] [[-Access] <TokenAccessRights>] [<CommonParameters>]
+Get-ThreadToken [[-ThreadId] <Int32[]>] [[-Access] <TokenAccessRights>] [-OpenAsSelf] [<CommonParameters>]
 ```
 
 ### Handle
 ```
-Get-ProcessToken [-Process] <SafeHandle[]> [[-Access] <TokenAccessRights>] [<CommonParameters>]
+Get-ThreadToken [-Thread] <SafeHandle[]> [[-Access] <TokenAccessRights>] [-OpenAsSelf] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Gets the access token for the current or specific process.
+Gets the access token for the current or specific thread.
+This may fail if the thread is not associated with any token, e.g. it's not impersonating anything.
 
 ## EXAMPLES
 
-### Get access token for the current process
+### Get access token for the current thread
 ```powershell
-PS C:\> $token = Get-ProcessToken
+PS C:\> $token = Get-ThreadToken
 ```
 
-Get the token for the current process with Query rights.
+Get the token for the current thread with Query rights.
 
 ## PARAMETERS
 
@@ -53,10 +54,26 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Process
-The process handle, or list of handles, to get the access token for.
-Use Get-ProcessHandle to get a process handle for another process.
-When omitted the access token for the current process is used.
+### -OpenAsSelf
+Will open the token using the security context of the process rather than the current thread.
+Setting this switch allows the caller to open a thread token using the normal process context rather than the current thread impersonation context.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Thread
+The thread handle, or list of handles, to get the access token for.
+Use Get-TokenHandle to get a process handle for another process.
+When omitted the access token for the current thread is used.
 
 ```yaml
 Type: SafeHandle[]
@@ -70,8 +87,8 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -ProcessId
-The process id, or list of pids, to get the access token for.
+### -ThreadId
+The thread id, or list of tids, to get the access token for.
 
 ```yaml
 Type: Int32[]
@@ -79,7 +96,7 @@ Parameter Sets: Id
 Aliases: Id
 
 Required: False
-Position: Named
+Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
@@ -91,10 +108,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Int32[]
-The process ids to get the access token for.
+The thread ids to get the access token for.
 
 ### System.Runtime.InteropServices.SafeHandle[]
-The process handles to get the access token for.
+The thread handles to get the access token for.
 
 ### PSAccessToken.TokenAccessRights
 The desired access rights for the access token.
@@ -102,10 +119,10 @@ The desired access rights for the access token.
 ## OUTPUTS
 
 ### System.Runtime.InteropServices.SafeHandle
-The access token that was opened. Make sure to call `.Dispose()` when finished with the token to close the unmanaged resource that it relates to.
+The access token that was opened. Make sure to call `.Dispose()` when finished with the token to close the unmanaged resource that it related to.
 
 ## NOTES
 
 ## RELATED LINKS
 
-[OpenProcessToken](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocesstoken)
+[OpenThreadToken](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openthreadtoken)
