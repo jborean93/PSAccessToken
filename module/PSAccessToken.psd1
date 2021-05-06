@@ -82,10 +82,12 @@ CmdletsToExport = @(
     'Get-TokenImpersonationLevel'
     'Get-TokenOwner'
     'Get-TokenPrimaryGroup'
+    'Get-TokenSecurity'
     'Get-TokenType'
     'Get-TokenUser'
     'New-TokenSecurity'
     'Set-HandleInformation'
+    'Set-TokenSecurity'
 )
 
 # Variables to export from this module

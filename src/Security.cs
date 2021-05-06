@@ -59,6 +59,7 @@ namespace PSAccessToken
 
     internal class SecurityHelper
     {
+/*
         private static readonly MethodInfo s_createNullDaclMeth = Reflection.GetMethod(
             typeof(DiscretionaryAcl),
             "CreateAllowEveryoneFullAccess",
@@ -72,6 +73,7 @@ namespace PSAccessToken
             return Reflection.InvokeMethod<DiscretionaryAcl>(s_createNullDaclMeth, null,
                 new object[] { false, false });
         }
+*/
 
         public static IdentityReference TranslateIdentifier(IdentityReference identity, Type identityType, bool strict = true)
         {

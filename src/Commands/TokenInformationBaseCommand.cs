@@ -16,7 +16,7 @@ namespace PSAccessToken
     {
         protected const string DefaultParameterSetName = "CurrentIdentity";
 
-        protected TokenAccessRights RequiredRights
+        protected virtual TokenAccessRights RequiredRights
         {
             get
             {

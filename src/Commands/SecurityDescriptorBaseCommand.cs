@@ -13,7 +13,11 @@ namespace PSAccessToken
         {
             if (inputData == null)
                 return null;
-            else if (inputData is AuthorizationRuleCollection)
+
+            if (inputData is PSObject)
+                inputData = ((PSObject)inputData).BaseObject;
+
+            if (inputData is AuthorizationRuleCollection)
                 return inputData;
 
             bool fail = false;
@@ -63,7 +67,6 @@ namespace PSAccessToken
         [Parameter()]
         [AuthzCollectionTransformation()]
         [AllowEmptyCollection()]
-        [AllowNull()]
         public AuthorizationRuleCollection? Access { get; set; }
 
         protected override void EndProcessing()
@@ -78,21 +81,38 @@ namespace PSAccessToken
                     Group = TokenInfo.GetPrimaryGroup(token);
 
                 if (Access == null)
-                    // If null was explicitly set then create a null DACL.
-                    if (MyInvocation.BoundParameters.ContainsKey("Access"))
-                        dacl = SecurityHelper.CreateNullDacl();
-                    else
-                        dacl = TokenInfo.GetDefaultDacl(token);
+                    // In all scenarios a NULL DACL means we use the default DACL value
+                    dacl = TokenInfo.GetDefaultDacl(token);
             }
 
             if (Access != null)
             {
-                dacl = new DiscretionaryAcl(false, false, 0, Access.Count);
+                dacl = new DiscretionaryAcl(false, false, 2, Access.Count);
 
-                AccessRule[] aces = new AccessRule[Access.Count];
-                Access.CopyTo(aces, 0);
-                foreach (AccessRule ace in aces)
+                foreach (AccessRule? ace in Access)
                 {
+                    if (ace == null)
+                    {
+                        WriteError(new ErrorRecord(
+                            new ArgumentNullException("Access contains null rule"),
+                            String.Format("{0}.{1}", MyInvocation.MyCommand.Name, nameof(ArgumentException)),
+                            ErrorCategory.InvalidData,
+                            Access
+                        ));
+                        return;
+                    }
+
+                    SecurityIdentifier sid;
+                    try
+                    {
+                        sid = ConvertToSid(ace.IdentityReference);
+                    }
+                    catch (IdentityNotMappedException e)
+                    {
+                        WriteIdentityNotMappedError(e, ace.IdentityReference);
+                        return;
+                    }
+
                     dacl.AddAccess(
                         ace.AccessControlType,
                         ConvertToSid(ace.IdentityReference),
@@ -103,23 +123,51 @@ namespace PSAccessToken
                 }
             }
 
+            SecurityIdentifier ownerSid;
+            try
+            {
+                ownerSid = ConvertToSid(Owner);
+            }
+            catch (IdentityNotMappedException e)
+            {
+                WriteIdentityNotMappedError(e, Owner);
+                return;
+            }
+
+            SecurityIdentifier groupSid;
+            try
+            {
+                groupSid = ConvertToSid(Group);
+            }
+            catch (IdentityNotMappedException e)
+            {
+                WriteIdentityNotMappedError(e, Group);
+                return;
+            }
+
             CommonSecurityDescriptor rawSec = new CommonSecurityDescriptor(
                 false,
                 false,
                 ControlFlags.DiscretionaryAclPresent,
-                ConvertToSid(Owner),
-                ConvertToSid(Group),
+                ownerSid,
+                groupSid,
                 null,  // TODO: SACL
                 dacl
             );
-            T sec = CreateSecurityDescriptor(rawSec);
-
-            WriteObject(sec);
+            WriteObject(CreateSecurityDescriptor(rawSec));
         }
 
         private SecurityIdentifier ConvertToSid(IdentityReference id)
         {
             return (SecurityIdentifier)SecurityHelper.TranslateIdentifier(id, typeof(SecurityIdentifier), true);
+        }
+
+        private void WriteIdentityNotMappedError(IdentityNotMappedException exception, object? obj)
+        {
+            WriteError(new ErrorRecord(
+                exception, String.Format("{0}.{1}", MyInvocation.MyCommand.Name, nameof(IdentityNotMappedException)),
+                ErrorCategory.InvalidData, obj
+            ));
         }
 
         protected abstract T CreateSecurityDescriptor(CommonSecurityDescriptor sd);

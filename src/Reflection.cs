@@ -17,6 +17,7 @@ namespace PSAccessToken
                 String.Format("Field {0} returned unexpected null value", field.Name));
         }
 
+/*
         public static MethodInfo GetMethod(Type type, string name, BindingFlags flags, Type[] types)
         {
             return type.GetMethod(name, flags, null, types, null) ?? throw new NotSupportedException(
@@ -28,6 +29,7 @@ namespace PSAccessToken
             return (T)method.Invoke(obj, parameters) ?? throw new NullReferenceException(
                 String.Format("Method {0} return unexpected null value", method.Name));
         }
+*/
 
         public static PropertyInfo GetProperty(Type type, string name, BindingFlags flags)
         {
