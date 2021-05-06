@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Management.Automation;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
@@ -47,6 +48,12 @@ namespace PSAccessToken
     public abstract class SecurityDescriptorBaseCommand<T> : PSCmdlet
         where T : NativeSecurity
     {
+        private static readonly PropertyInfo s_AccessMaskProp = Reflection.GetProperty(
+            typeof(AccessRule),
+            "AccessMask",
+            BindingFlags.NonPublic | BindingFlags.Instance
+        );
+
         [Parameter()]
         public IdentityReference? Owner { get; set; }
 
@@ -56,10 +63,12 @@ namespace PSAccessToken
         [Parameter()]
         [AuthzCollectionTransformation()]
         [AllowEmptyCollection()]
+        [AllowNull()]
         public AuthorizationRuleCollection? Access { get; set; }
 
         protected override void EndProcessing()
         {
+            DiscretionaryAcl? dacl = null;
             using (var token = NativeMethods.OpenProcessToken(0, TokenAccessRights.Query))
             {
                 if (Owner == null)
@@ -67,25 +76,52 @@ namespace PSAccessToken
 
                 if (Group == null)
                     Group = TokenInfo.GetPrimaryGroup(token);
+
+                if (Access == null)
+                    // If null was explicitly set then create a null DACL.
+                    if (MyInvocation.BoundParameters.ContainsKey("Access"))
+                        dacl = SecurityHelper.CreateNullDacl();
+                    else
+                        dacl = TokenInfo.GetDefaultDacl(token);
             }
 
-            T sec = CreateEmptySecurityDescriptor();
-            sec.SetOwner(Owner);
-            sec.SetGroup(Group);
-
-            // TODO: Deal with null DACL compared to empty DACL.
             if (Access != null)
             {
-                AccessRule[] acl = new AccessRule[Access.Count];
-                Access.CopyTo(acl, 0);
+                dacl = new DiscretionaryAcl(false, false, 0, Access.Count);
 
-                foreach (AccessRule ace in acl)
-                    sec.AddAccessRule(ace);
+                AccessRule[] aces = new AccessRule[Access.Count];
+                Access.CopyTo(aces, 0);
+                foreach (AccessRule ace in aces)
+                {
+                    dacl.AddAccess(
+                        ace.AccessControlType,
+                        ConvertToSid(ace.IdentityReference),
+                        Reflection.GetPropertyValue<int>(s_AccessMaskProp, ace),
+                        ace.InheritanceFlags,
+                        ace.PropagationFlags
+                    );
+                }
             }
+
+            CommonSecurityDescriptor rawSec = new CommonSecurityDescriptor(
+                false,
+                false,
+                ControlFlags.DiscretionaryAclPresent,
+                ConvertToSid(Owner),
+                ConvertToSid(Group),
+                null,  // TODO: SACL
+                dacl
+            );
+            T sec = CreateSecurityDescriptor(rawSec);
 
             WriteObject(sec);
         }
 
-        protected abstract T CreateEmptySecurityDescriptor();
+        private SecurityIdentifier ConvertToSid(IdentityReference id)
+        {
+            return (SecurityIdentifier)SecurityHelper.TranslateIdentifier(id, typeof(SecurityIdentifier), true);
+        }
+
+        protected abstract T CreateSecurityDescriptor(CommonSecurityDescriptor sd);
     }
 }

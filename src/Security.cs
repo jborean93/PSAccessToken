@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -56,50 +57,20 @@ namespace PSAccessToken
         }
     }
 
-    internal class PrincipalHelper
+    internal class SecurityHelper
     {
-        public static AuthorizationRuleCollection TranslateRawAcl(RawAcl raw, Type identityType,
-            NativeObjectSecurity sd)
+        private static readonly MethodInfo s_createNullDaclMeth = Reflection.GetMethod(
+            typeof(DiscretionaryAcl),
+            "CreateAllowEveryoneFullAccess",
+            BindingFlags.NonPublic | BindingFlags.Static,
+            new Type[] { typeof(bool), typeof(bool) }
+        );
+
+        public static DiscretionaryAcl CreateNullDacl()
         {
-            AuthorizationRuleCollection acl = new AuthorizationRuleCollection();
-
-            foreach (GenericAce ace in raw)
-            {
-                AuthorizationRule rule;
-                if (ace.AceType == AceType.SystemAudit)
-                {
-                    AuditFlags flags = AuditFlags.None;
-                    if (ace.AceFlags.HasFlag(AceFlags.SuccessfulAccess))
-                        flags |= AuditFlags.Success;
-
-                    if (ace.AceFlags.HasFlag(AceFlags.FailedAccess))
-                        flags |= AuditFlags.Failure;
-
-                    rule = sd.AuditRuleFactory(
-                        TranslateIdentifier(((CommonAce)ace).SecurityIdentifier, identityType, false),
-                        ((CommonAce)ace).AccessMask,
-                        ace.IsInherited,
-                        ace.InheritanceFlags,
-                        ace.PropagationFlags,
-                        flags
-                    );
-                }
-                else
-                {
-                    rule = sd.AccessRuleFactory(
-                        TranslateIdentifier(((CommonAce)ace).SecurityIdentifier, identityType, false),
-                        ((CommonAce)ace).AccessMask,
-                        ace.IsInherited,
-                        ace.InheritanceFlags,
-                        ace.PropagationFlags,
-                        (AccessControlType)ace.AceType
-                    );
-                }
-
-                acl.AddRule(rule);
-            }
-
-            return acl;
+            // This isn't exposed publicly so we rely on reflection to call this method.
+            return Reflection.InvokeMethod<DiscretionaryAcl>(s_createNullDaclMeth, null,
+                new object[] { false, false });
         }
 
         public static IdentityReference TranslateIdentifier(IdentityReference identity, Type identityType, bool strict = true)
@@ -202,11 +173,34 @@ namespace PSAccessToken
 
     public abstract class NativeSecurity : NativeObjectSecurity
     {
+        private static readonly FieldInfo s_secDescField = Reflection.GetField(
+            typeof(NativeSecurity),
+            "_securityDescriptor",
+            BindingFlags.NonPublic | BindingFlags.Instance
+        );
+
+        private CommonSecurityDescriptor NativeSecurityDescriptor
+        {
+            get
+            {
+                return Reflection.GetFieldValue<CommonSecurityDescriptor>(s_secDescField, this);
+            }
+            set
+            {
+                s_secDescField.SetValue(this, value);
+            }
+        }
+
         protected NativeSecurity(bool isContainer, ResourceType resourceType)
             : base(isContainer, resourceType) { }
 
         protected NativeSecurity(bool isContainer, ResourceType resourceType, SafeHandle? handle,
             AccessControlSections includeSections) : base(isContainer, resourceType, handle, includeSections) { }
+
+        protected NativeSecurity(ResourceType resourceType, CommonSecurityDescriptor sd) : base(false, resourceType)
+        {
+            NativeSecurityDescriptor = sd;
+        }
 
         public new void AddAccessRule(AccessRule rule) { base.AddAccessRule(rule); }
         public new void AddAuditRule(AuditRule rule) { base.AddAuditRule(rule); }
@@ -236,6 +230,8 @@ namespace PSAccessToken
         public override Type AuditRuleType { get { throw new NotImplementedException(); } }
 
         protected NativeSecurity(ResourceType resourceType) : base(false, resourceType) { }
+
+        protected NativeSecurity(ResourceType resourceType, CommonSecurityDescriptor sd) : base(resourceType, sd) { }
         protected NativeSecurity(ResourceType resourceType, SafeHandle handle,
             AccessControlSections includeSections)
             : base(false, resourceType, handle, includeSections) { }

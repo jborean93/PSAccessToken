@@ -204,7 +204,7 @@ namespace PSAccessToken
             }
         }
 
-        public static RawAcl? GetDefaultDacl(SafeHandle token)
+        public static DiscretionaryAcl? GetDefaultDacl(SafeHandle token)
         {
             using (var buffer = NativeMethods.GetTokenInformation(token, TokenInformationClass.DefaultDacl))
             {
@@ -216,7 +216,8 @@ namespace PSAccessToken
 
                 byte[] data = new byte[buffer.Length];
                 Marshal.Copy(tokenDefaultDacl.DefaultDacl, data, 0, data.Length);
-                return new RawAcl(data, 0);
+
+                return new DiscretionaryAcl(false, false, new RawAcl(data, 0));
             }
         }
 

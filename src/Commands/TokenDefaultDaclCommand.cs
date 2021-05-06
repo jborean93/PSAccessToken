@@ -19,13 +19,22 @@ namespace PSAccessToken
 
         protected override void TokenOperation(SafeHandle token)
         {
-            RawAcl? rawDacl  = TokenInfo.GetDefaultDacl(token);
+            DiscretionaryAcl? rawDacl  = TokenInfo.GetDefaultDacl(token);
             if (rawDacl == null)
                 return;
 
-            TokenSecurity sec = new TokenSecurity();
-            AuthorizationRuleCollection dacl = PrincipalHelper.TranslateRawAcl(rawDacl, IdentityType, sec);
-            WriteObject(dacl, false);
+            CommonSecurityDescriptor rawSd = new CommonSecurityDescriptor(
+                false,
+                false,
+                ControlFlags.DiscretionaryAclPresent,
+                null,
+                null,
+                null,
+                rawDacl
+            );
+
+            TokenSecurity sec = new TokenSecurity(rawSd);
+            WriteObject(sec.GetAccessRules(IdentityType));
         }
     }
 }

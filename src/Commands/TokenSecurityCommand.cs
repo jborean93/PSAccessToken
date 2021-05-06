@@ -1,6 +1,5 @@
-using System;
 using System.Management.Automation;
-using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Security.Principal;
 
 namespace PSAccessToken
@@ -11,9 +10,9 @@ namespace PSAccessToken
     [OutputType(typeof(IdentityReference))]
     public class TokenSecurityCommand : SecurityDescriptorBaseCommand<TokenSecurity>
     {
-        protected override TokenSecurity CreateEmptySecurityDescriptor()
+        protected override TokenSecurity CreateSecurityDescriptor(CommonSecurityDescriptor sd)
         {
-            return new TokenSecurity();
+            return new TokenSecurity(sd);
         }
     }
 }

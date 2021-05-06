@@ -119,6 +119,8 @@ namespace PSAccessToken
     {
         public TokenSecurity() : base(ResourceType.KernelObject) { }
 
+        public TokenSecurity(CommonSecurityDescriptor sd) : base(ResourceType.KernelObject, sd) { }
+
         public TokenSecurity(SafeHandle handle, AccessControlSections includeSections)
             : base(ResourceType.KernelObject, handle, includeSections) { }
 
