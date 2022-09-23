@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace PSAccessToken
@@ -16,6 +15,9 @@ namespace PSAccessToken
             return new SafeNativeHandle(NativeGetCurrentThread(), false, true);
         }
 
+        [DllImport("Kernel32.dll")]
+        public static extern Int32 GetCurrentThreadId();
+
         [DllImport("Kernel32.dll", EntryPoint = "OpenThread", SetLastError = true)]
         private static extern SafeNativeHandle NativeOpenThread(
             ThreadAccessRights dwDesiredAccess,
@@ -27,7 +29,7 @@ namespace PSAccessToken
         {
             var handle = NativeOpenThread(access, inherit, tid);
             if (handle.IsInvalid)
-                throw new Win32Exception();
+                throw new NativeException("OpenThread");
 
             return handle;
         }

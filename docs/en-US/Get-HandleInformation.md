@@ -1,13 +1,14 @@
 ---
 external help file: PSAccessToken.dll-Help.xml
 Module Name: PSAccessToken
-online version:
+online version: https://github.com/jborean93/PSAccessToken/blob/main/docs/en-US/Get-HandleInformation.md
 schema: 2.0.0
 ---
 
 # Get-HandleInformation
 
 ## SYNOPSIS
+
 Get information on a Windows handle.
 
 ## SYNTAX
@@ -17,11 +18,13 @@ Get-HandleInformation [-Handle] <SafeHandle[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Get handle information such as whether it is inheritable or protected from being closed.
 
 ## EXAMPLES
 
 ### Get handle information
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 PS C:\> Get-HandleInformation -Handle $handle
@@ -32,6 +35,7 @@ Gets the handle flags for the opened process handle.
 ## PARAMETERS
 
 ### -Handle
+
 The handle, or list of handles, to get the handle information for.
 
 ```yaml

@@ -1,15 +1,16 @@
-$moduleName   = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '..', 'module', '*.psd1'))).BaseName
-$manifestPath = [IO.Path]::Combine($PSScriptRoot, '..', 'build', $moduleName)
-
-Import-Module $manifestPath
+. ([IO.Path]::Combine($PSScriptRoot, 'common.ps1'))
 
 Describe "Get-ProcessToken" {
     Context "Current process" {
         It "Gets token" {
             $handle = Get-ProcessToken
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Closes the token" {
@@ -25,23 +26,48 @@ Describe "Get-ProcessToken" {
             $process = Get-ProcessHandle
         }
 
+        AfterAll {
+            $process.Dispose()
+        }
+
         It "Gets token" {
             $handle = Get-ProcessToken -Process $process
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Pipe handle to input" {
             $handle = $process | Get-ProcessToken
-
-            $handle.IsInvalid | Should -Be $false
-            $handle.IsClosed | Should -Be $false
+            try {
+                $handle.IsInvalid | Should -Be $false
+                $handle.IsClosed | Should -Be $false
+            }
+            finally {
+                $handle.Dispose()
+            }
         }
 
         It "Fails to open token - invalid access" {
             $limitedProcess = Get-ProcessHandle -Id $pid -Access CreateProcess
-            $out = Get-ProcessToken -Process $limitedProcess -ErrorVariable err -ErrorAction SilentlyContinue
+            try {
+                $out = Get-ProcessToken -Process $limitedProcess -ErrorVariable err -ErrorAction SilentlyContinue
+            }
+            finally {
+                $limitedProcess.Dispose()
+            }
+
+            $out | Should -Be $null
+            $err.Count | Should -Be 1
+            $err[0] | Should -BeLike 'Failed to get process token*Access is denied*'
+        }
+
+        It "Fails to open token with pid" {
+            $out = Get-ProcessToken -ProcessId 4 -ErrorVariable err -ErrorAction SilentlyContinue
 
             $out | Should -Be $null
             $err.Count | Should -Be 1

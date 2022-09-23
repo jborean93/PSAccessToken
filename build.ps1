@@ -6,7 +6,7 @@ param(
     $Configuration = 'Debug',
 
     [Parameter()]
-    [string]
+    [string[]]
     $Task = 'Build'
 )
 
@@ -16,7 +16,7 @@ end {
     }
 
     $modulePath = [IO.Path]::Combine($PSScriptRoot, 'tools', 'Modules')
-    $requirements = Import-PowerShellDataFile ([IO.Path]::Combine($PSScriptRoot, 'requirements.psd1'))
+    $requirements = Import-PowerShellDataFile ([IO.Path]::Combine($PSScriptRoot, 'requirements-dev.psd1'))
     foreach ($req in $requirements.GetEnumerator()) {
         $targetPath = [IO.Path]::Combine($modulePath, $req.Key)
 
@@ -29,8 +29,8 @@ end {
         New-Item -Path $targetPath -ItemType Directory | Out-Null
 
         $webParams = @{
-            Uri = "https://www.powershellgallery.com/api/v2/package/$($req.Key)/$($req.Value)"
-            OutFile = [IO.Path]::Combine($modulePath, "$($req.Key).zip")  # WinPS requires the .zip extension to extract
+            Uri             = "https://www.powershellgallery.com/api/v2/package/$($req.Key)/$($req.Value)"
+            OutFile         = [IO.Path]::Combine($modulePath, "$($req.Key).zip")  # WinPS requires the .zip extension to extract
             UseBasicParsing = $true
         }
         if ('Authentication' -in (Get-Command -Name Invoke-WebRequest).Parameters.Keys) {
@@ -58,8 +58,8 @@ end {
     }
 
     $invokeBuildSplat = @{
-        Task = $Task
-        File = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '*.build.ps1'))).FullName
+        Task          = $Task
+        File          = (Get-Item ([IO.Path]::Combine($PSScriptRoot, '*.build.ps1'))).FullName
         Configuration = $Configuration
     }
     Invoke-Build @invokeBuildSplat

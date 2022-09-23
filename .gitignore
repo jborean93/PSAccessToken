@@ -362,7 +362,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 ### Custom entries ###
-build/
-tools/*
-!tools/ProcessRunspace.ps1
-
+output/
+tools/Modules
