@@ -6,6 +6,17 @@ namespace PSAccessToken
 {
     internal partial class NativeMethods
     {
+        [DllImport("Advapi32.dll", EntryPoint = "ImpersonateLoggedOnUser", SetLastError = true)]
+        private static extern bool NativeImpersonateLoggedOnUser(
+            SafeHandle hToken
+        );
+
+        public static void ImpersonateLoggedOnUser(SafeHandle token)
+        {
+            if (!NativeImpersonateLoggedOnUser(token))
+                throw new NativeException("ImpersonateLoggedOnUser");
+        }
+
         [DllImport("Advapi32.dll", EntryPoint = "OpenProcessToken", SetLastError = true)]
         private static extern bool NativeOpenProcessToken(
             SafeHandle ProcessHandle,
