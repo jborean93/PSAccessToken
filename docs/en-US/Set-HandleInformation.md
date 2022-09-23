@@ -1,13 +1,14 @@
 ---
 external help file: PSAccessToken.dll-Help.xml
 Module Name: PSAccessToken
-online version:
+online version: https://github.com/jborean93/PSAccessToken/blob/main/docs/en-US/Set-HandleInformation.md
 schema: 2.0.0
 ---
 
 # Set-HandleInformation
 
 ## SYNOPSIS
+
 Sets certain property of a Windows handle.
 
 ## SYNTAX
@@ -18,11 +19,13 @@ Set-HandleInformation [-Handle] <SafeHandle[]> [-Inherit] [-ProtectFromClose] [-
 ```
 
 ## DESCRIPTION
+
 Sets the Inherit or ProtectFromClose properties of a Windows handle.
 
 ## EXAMPLES
 
 ### Set a handle as inheritable
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 PS C:\> Set-HandleInformation -Handle $handle -Inherit
@@ -31,6 +34,7 @@ PS C:\> Set-HandleInformation -Handle $handle -Inherit
 Sets the specified handles are inheritable, keeping any existing flags.
 
 ### Set a handle with protect from close and clear other flags
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 PS C:\> Set-HandleInformation -Handle $handle -ProtectFromClose -Clear
@@ -39,6 +43,7 @@ PS C:\> Set-HandleInformation -Handle $handle -ProtectFromClose -Clear
 Protects the handle from being closed and clears any other flags like Inherit.
 
 ### Clear all handle flags
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 PS C:\> Set-HandleInformation -Handle $handle -Clear
@@ -49,6 +54,7 @@ Clears the Inherit and ProtectFromClose flags on the handle.
 ## PARAMETERS
 
 ### -Clear
+
 When set then all the existing flags will be unset except for the parameters specified.
 When unset, or not specified, the parameters specified add to the existing flags already set.
 Use this to clear any existing handle flags you don't want to be set.
@@ -66,6 +72,7 @@ Accept wildcard characters: False
 ```
 
 ### -Handle
+
 The handle, or list of handles, to set the information on.
 
 ```yaml
@@ -81,6 +88,7 @@ Accept wildcard characters: False
 ```
 
 ### -Inherit
+
 Whether to set the Inherit flag on the handle(s) specified.
 
 ```yaml
@@ -96,6 +104,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProtectFromClose
+
 Whether to set the ProtectFromClose flag on the handle(s) specified.
 
 ```yaml
@@ -111,6 +120,7 @@ Accept wildcard characters: False
 ```
 
 ### -Confirm
+
 Prompts you for confirmation before running the cmdlet.
 
 ```yaml
@@ -126,6 +136,7 @@ Accept wildcard characters: False
 ```
 
 ### -WhatIf
+
 Shows what would happen if the cmdlet runs. The cmdlet is not run.
 
 ```yaml

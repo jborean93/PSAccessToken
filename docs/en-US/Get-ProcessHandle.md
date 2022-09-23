@@ -1,36 +1,32 @@
 ---
 external help file: PSAccessToken.dll-Help.xml
 Module Name: PSAccessToken
-online version:
+online version: https://github.com/jborean93/PSAccessToken/blob/main/docs/en-US/Get-ProcessHandle.md
 schema: 2.0.0
 ---
 
 # Get-ProcessHandle
 
 ## SYNOPSIS
+
 Get a handle to the current process or the process specified.
 
 ## SYNTAX
 
-### Current (Default)
 ```
-Get-ProcessHandle [-Current] [<CommonParameters>]
-```
-
-### Explicit
-```
-Get-ProcessHandle [-ProcessId] <Int32[]> [[-Access] <ProcessAccessRights>] [-Inherit] [<CommonParameters>]
+Get-ProcessHandle [[-ProcessId] <Int32[]>] [[-Access] <ProcessAccessRights>] [-Inherit] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Gets a handle to the current process or the process specified.
 This handle can be used for further actions on the process that was opened.
-When no parameters, or `-Current`, is specified then the handle is a pseudo handle with full access rights to the current process.
-When `-Id` is specified then it will get the handle to the process with that ID with the access rights specified.
+When parameters are specified then the handle is a pseudo handle with full access rights to the current process.
 
 ## EXAMPLES
 
 ### Get current process handle
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle
 ```
@@ -38,6 +34,7 @@ PS C:\> $handle = Get-ProcessHandle
 Gets the handle to the current process with `AllAccess` rights.
 
 ### Get process handle for another process
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 ```
@@ -45,6 +42,7 @@ PS C:\> $handle = Get-ProcessHandle -ProcessId 1234
 Gets the handle to the process with the PID of 1234.
 
 ### Get process handle for another process with custom access rights
+
 ```powershell
 PS C:\> $handle = Get-ProcessHandle -ProcessId 1234 -Access DupHandle, QueryInformation
 ```
@@ -54,12 +52,14 @@ Gets the handle to the process with the PID of 1234 with DupHandle and QueryInfo
 ## PARAMETERS
 
 ### -Access
+
 The desired access rights to the process object.
 The default is `QueryInformation` which allows you to query information about the process.
+If specified without a `ProcessId` then the process handle is for the current process with the access specified.
 
 ```yaml
 Type: ProcessAccessRights
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases:
 Accepted values: Terminate, CreateThread, VMOperation, VMRead, VMWrite, DupHandle, CreateProcess, SetQuota, SetInformation, QueryInformation, SuspendResume, QueryLimitedInformation, Delete, ReadControl, WriteDAC, WriteOwner, StandardRightsRequired, Synchronize, AllAccess, AccessSystemSecurity
 
@@ -70,28 +70,14 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Current
-Gets the handle to the current process with AllAccess rights and no inheritance.
-This is the default action even when the switch isn't provided and is only used to differenciate between parameter set.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: Current
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Inherit
+
 The handle can be inherited by any child processes spawned by the caller process.
+When specified without a `ProcessId` then the process handle is for the current process that is inheritable.
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases:
 
 Required: False
@@ -102,14 +88,15 @@ Accept wildcard characters: False
 ```
 
 ### -ProcessId
+
 The process ID, or list of, to open the handle for.
 
 ```yaml
 Type: Int32[]
-Parameter Sets: Explicit
+Parameter Sets: (All)
 Aliases: Id
 
-Required: True
+Required: False
 Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)

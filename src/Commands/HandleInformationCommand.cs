@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 
@@ -17,20 +16,20 @@ namespace PSAccessToken
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true
         )]
-        public SafeHandle[] Handle { get; set; }
+        public SafeHandle[] Handle { get; set; } = Array.Empty<SafeHandle>();
 
         protected override void ProcessRecord()
         {
-            foreach (SafeHandle h in Handle)
+            foreach (SafeHandle h in Handle ?? Array.Empty<SafeHandle>())
             {
                 try
                 {
                     WriteObject(NativeMethods.GetHandleInformation(h));
                 }
-                catch (Win32Exception e)
+                catch (NativeException e)
                 {
                     WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to get handle information",
-                        "GetHandleInformation", (Int64)h.DangerousGetHandle()));
+                        (Int64)h.DangerousGetHandle()));
                 }
             }
         }
@@ -48,7 +47,7 @@ namespace PSAccessToken
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true
         )]
-        public SafeHandle[] Handle { get; set; }
+        public SafeHandle[] Handle { get; set; } = Array.Empty<SafeHandle>();
 
         [Parameter()]
         public SwitchParameter Inherit { get; set; }
@@ -92,10 +91,10 @@ namespace PSAccessToken
                         NativeMethods.SetHandleInformation(h, _mask, _flags);
                     }
                 }
-                catch (Win32Exception e)
+                catch (NativeException e)
                 {
                     WriteError(ErrorHelper.GenerateWin32Error(e, "Failed to set handle information",
-                        "SetHandleInformation", (Int64)h.DangerousGetHandle()));
+                        (Int64)h.DangerousGetHandle()));
                 }
             }
         }

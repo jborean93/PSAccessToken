@@ -5,16 +5,13 @@
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/PSAccessToken.svg)](https://www.powershellgallery.com/packages/PSAccessToken)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jborean93/PSAccessToken/blob/main/LICENSE)
 
-
 Various cmdlets that can be used to manipulate [Windows Access token](https://docs.microsoft.com/en-us/windows/desktop/SecAuthZ/access-tokens).
 
 Better docs are forthcoming, this is still a work in progress.
 
-
 ## Info
 
-TODO Link to docs
-
+Documentation for this module and details on the cmdlets included can be found [here](docs/en-US/PSAccessToken.md).
 
 ## Requirements
 
@@ -22,7 +19,6 @@ These cmdlets have the following requirements
 
 * PowerShell v5.1 or newer
 * Windows Server 2008 R2/Windows 7 or newer
-
 
 ## Installing
 
@@ -32,13 +28,12 @@ The easiest way to install this module is through
 You can install this module by running;
 
 ```powershell
-# Install for all users
-Install-Module -Name PSAccessToken
-
 # Install for only the current user
 Install-Module -Name PSAccessToken -Scope CurrentUser
-```
 
+# Install for all users - requires admin/root rights
+Install-Module -Name PSAccessToken -Scope AllUsers
+```
 
 ## Contributing
 
@@ -46,7 +41,6 @@ Contributing is quite easy, fork this repo and submit a pull request with the ch
 To build this module run `.\build.ps1 -Task Build` in PowerShell.
 To test a build run `.\build.ps1 -Task Test` in PowerShell.
 This script will ensure all dependencies are installed before running the test suite.
-
 
 ## Backlog
 
